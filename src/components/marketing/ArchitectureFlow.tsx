@@ -1,6 +1,4 @@
-import { Label } from '../system'
-import { useInView } from '../../lib/useInView'
-import { cx } from '../../lib/cx'
+import { Label, Reveal } from '../system'
 
 const BLOCKS = [
   { id: '01', name: 'Virtual environment', detail: 'Moving terminal, decoy sources, atmosphere' },
@@ -19,27 +17,19 @@ const BLOCKS = [
  * can be swapped for a hardware interface without redesigning the rest.
  */
 export function ArchitectureFlow() {
-  const { ref, inView } = useInView<HTMLDivElement>({ threshold: 0.2 })
-
   return (
-    <div ref={ref} className="grid gap-12 sm:grid-cols-2 lg:grid-cols-3">
+    <div className="grid gap-12 sm:grid-cols-2 lg:grid-cols-3">
       {BLOCKS.map((b, i) => (
-        <div
-          key={b.id}
-          className={cx(
-            'flex flex-col gap-8 rounded-md border border-rule bg-surface p-16',
-            'transition-all duration-500 ease-out',
-            inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-[12px]',
-          )}
-          style={{ transitionDelay: `${i * 60}ms` }}
-        >
-          <div className="flex items-center gap-8">
-            <span className="font-mono text-hud font-medium text-beam">{b.id}</span>
-            <Label>{i === BLOCKS.length - 1 ? 'Output' : `Stage ${b.id}`}</Label>
+        <Reveal key={b.id} delay={i * 60} className="h-full">
+          <div className="flex h-full flex-col gap-8 rounded-md border border-rule bg-surface p-16">
+            <div className="flex items-center gap-8">
+              <span className="font-mono text-hud font-medium text-beam">{b.id}</span>
+              <Label>{i === BLOCKS.length - 1 ? 'Output' : `Stage ${b.id}`}</Label>
+            </div>
+            <h3 className="text-small font-medium text-ink">{b.name}</h3>
+            <p className="text-caption text-ink-muted">{b.detail}</p>
           </div>
-          <h3 className="text-small font-medium text-ink">{b.name}</h3>
-          <p className="text-caption text-ink-muted">{b.detail}</p>
-        </div>
+        </Reveal>
       ))}
     </div>
   )
