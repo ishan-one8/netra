@@ -412,3 +412,134 @@
     transition: none;
   }
 }
+
+/* ---- Aurora ---------------------------------------------------------------
+   Slow optical bloom behind the hero. Three blurred fields drifting on
+   different periods so the composition never repeats. Pure CSS — no canvas,
+   no per-frame JavaScript. */
+
+.aurora {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  mask-image: linear-gradient(to bottom, black 0%, black 62%, transparent 100%);
+}
+
+.aurora-blob {
+  position: absolute;
+  border-radius: var(--radius-full);
+  filter: blur(90px);
+  opacity: 0.5;
+  will-change: transform;
+}
+
+.aurora-blob-1 {
+  width: 46vw;
+  height: 46vw;
+  left: -6vw;
+  top: -14vw;
+  background: var(--color-aurora-beam);
+  animation: aurora-drift-1 26s ease-in-out infinite alternate;
+}
+
+.aurora-blob-2 {
+  width: 40vw;
+  height: 40vw;
+  right: -8vw;
+  top: -6vw;
+  background: var(--color-aurora-deep);
+  opacity: 0.32;
+  animation: aurora-drift-2 34s ease-in-out infinite alternate;
+}
+
+.aurora-blob-3 {
+  width: 52vw;
+  height: 34vw;
+  left: 22vw;
+  top: 12vw;
+  background: var(--color-aurora-warm);
+  opacity: 0.42;
+  animation: aurora-drift-3 29s ease-in-out infinite alternate;
+}
+
+@keyframes aurora-drift-1 {
+  from { transform: translate3d(0, 0, 0) scale(1); }
+  to   { transform: translate3d(9vw, 5vw, 0) scale(1.18); }
+}
+
+@keyframes aurora-drift-2 {
+  from { transform: translate3d(0, 0, 0) scale(1.1); }
+  to   { transform: translate3d(-7vw, 8vw, 0) scale(0.92); }
+}
+
+@keyframes aurora-drift-3 {
+  from { transform: translate3d(0, 0, 0) scale(0.95); }
+  to   { transform: translate3d(-5vw, -4vw, 0) scale(1.15); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .aurora-blob {
+    animation: none;
+  }
+}
+
+/* Film grain. Keeps large flat colour fields from banding, and is most of why
+   a gradient reads as photographed rather than rendered. */
+.grain::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.4;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.32'/%3E%3C/svg%3E");
+}
+
+/* A panel that sits on the aurora and lets it through. */
+@utility glass {
+  background: var(--color-glass);
+  backdrop-filter: blur(20px) saturate(1.6);
+  -webkit-backdrop-filter: blur(20px) saturate(1.6);
+  border: 1px solid var(--color-glass-edge);
+  box-shadow: var(--shadow-glass);
+}
+
+/* The accent word, lit rather than coloured. */
+@utility text-gradient {
+  background-image: linear-gradient(
+    100deg,
+    var(--color-aurora-beam) 0%,
+    var(--color-aurora-deep) 52%,
+    var(--color-aurora-beam) 100%
+  );
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: text-sheen 9s ease-in-out infinite;
+}
+
+@keyframes text-sheen {
+  0%, 100% { background-position: 0% 50%; }
+  50%      { background-position: 100% 50%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .text-gradient {
+    animation: none;
+  }
+}
+
+/* A soft light that follows the pointer across the hero. */
+.spotlight {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    340px circle at var(--mx, 50%) var(--my, 40%),
+    rgba(255, 74, 28, 0.13),
+    transparent 70%
+  );
+  transition: opacity 400ms var(--ease-out);
+}

@@ -26,6 +26,17 @@
 
   --color-sensor: #08080a;       /* the camera frame — the one dark surface */
 
+  /* Aurora — the optical bloom behind the hero. Three hues from one story:
+     the laser, deep space, and the warm edge where they meet. Only ever seen
+     through heavy blur at low opacity, never as a flat fill. */
+  --color-aurora-beam: #ff4a1c;
+  --color-aurora-deep: #6d3bff;
+  --color-aurora-warm: #ff9d6c;
+
+  /* Glass surfaces float over the aurora instead of hiding it. */
+  --color-glass: rgba(255, 255, 255, 0.72);
+  --color-glass-edge: rgba(255, 255, 255, 0.9);
+
   /* ---- Type faces -------------------------------------------------------- */
   --font-sans: 'Satoshi', 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
   --font-sans--font-feature-settings: 'ss01' on, 'cv11' on;
@@ -70,6 +81,10 @@
   --text-display: 88px;
   --text-display--line-height: 1;
   --text-display--letter-spacing: -0.04em;
+
+  --text-display-xl: 120px;
+  --text-display-xl--line-height: 0.95;
+  --text-display-xl--letter-spacing: -0.045em;
 
   /* Mono — every measured value in the product */
   --text-readout-lg: 48px;
@@ -147,6 +162,9 @@
   --shadow-md: 0 4px 16px rgba(10, 10, 11, 0.06), 0 1px 2px rgba(10, 10, 11, 0.04);
   --shadow-lg: 0 16px 48px rgba(10, 10, 11, 0.08), 0 2px 8px rgba(10, 10, 11, 0.04);
   --shadow-beam: 0 4px 16px rgba(255, 74, 28, 0.24);
+  --shadow-glow: 0 8px 32px rgba(255, 74, 28, 0.28), 0 2px 8px rgba(255, 74, 28, 0.16);
+  --shadow-glass: 0 24px 64px rgba(10, 10, 11, 0.1), 0 2px 8px rgba(10, 10, 11, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.7);
 
   /* ---- Layout ------------------------------------------------------------ */
   --container-page: 1200px;

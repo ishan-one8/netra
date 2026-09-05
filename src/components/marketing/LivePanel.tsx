@@ -1,5 +1,5 @@
 import { CameraViewport } from '../simulator/CameraViewport'
-import { Card, Label, StatusChip } from '../system'
+import { Label, StatusChip } from '../system'
 import { useTracker } from '../../sim/useTracker'
 
 /**
@@ -28,7 +28,7 @@ export function LivePanel() {
   ]
 
   return (
-    <Card elevation="raised" className="overflow-hidden p-12 sm:p-16">
+    <div className="glass overflow-hidden rounded-xl p-12 text-left sm:p-16">
       <div className="flex flex-wrap items-center justify-between gap-12 px-4 pb-12">
         <StatusChip state={state} />
         <span className="font-mono text-hud uppercase tracking-label text-ink-faint">
@@ -54,6 +54,6 @@ export function LivePanel() {
           </div>
         ))}
       </div>
-    </Card>
+    </div>
   )
 }

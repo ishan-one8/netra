@@ -6,6 +6,7 @@ import { TechStack } from '../components/marketing/TechStack'
 import { Team } from '../components/marketing/Team'
 import { Section } from '../components/layout/Section'
 import {
+  Aurora,
   Badge,
   Button,
   Card,
@@ -15,6 +16,7 @@ import {
   Marquee,
   PipelineNode,
   Reveal,
+  Spotlight,
 } from '../components/system'
 import { useInView } from '../lib/useInView'
 
@@ -82,8 +84,10 @@ export function Marketing() {
   return (
     <main>
       {/* ---- Hero ---------------------------------------------------------- */}
-      <section className="relative w-full overflow-hidden pt-48 pb-64 lg:pt-64 lg:pb-96">
-        <div aria-hidden className="graph-paper fade-b absolute inset-0" />
+      <section className="relative w-full overflow-hidden pt-64 pb-64 lg:pt-96 lg:pb-96">
+        <Aurora />
+        <Spotlight />
+        <div aria-hidden className="graph-paper fade-b absolute inset-0 opacity-60" />
 
         <div className="page-wide relative flex flex-col items-center gap-32 text-center">
           <Reveal>
@@ -92,23 +96,24 @@ export function Marketing() {
 
           <Heading
             as="h1"
-            size="display"
+            size="hero"
+            gradient
             text="Find the terminal. Hold it in frame."
             accent="frame"
-            className="max-w-[15ch]"
+            className="max-w-[14ch]"
           />
 
           <Reveal delay={180}>
-            <p className="max-w-[58ch] text-body-lg text-ink-muted">
-              NETRA is an AI-based virtual camera tracking system for the coarse-alignment stage
-              of mobile FSOC links — developed and tested entirely in software, with no camera,
-              no pan-tilt rig and no optical bench.
+            <p className="max-w-[56ch] text-body-lg text-ink-muted">
+              An AI-based virtual camera tracking system for the coarse-alignment stage of mobile
+              FSOC links — developed, stress-tested and measured entirely in software, with no
+              camera, no pan-tilt rig and no optical bench.
             </p>
           </Reveal>
 
           <Reveal delay={280}>
             <div className="flex flex-wrap items-center justify-center gap-12">
-              <Button to="/simulator" size="lg" arrow>
+              <Button to="/simulator" size="lg" variant="glow" arrow>
                 Open the simulator
               </Button>
               <Button href="#problem" variant="secondary" size="lg">
@@ -117,7 +122,25 @@ export function Marketing() {
             </div>
           </Reveal>
 
-          <Reveal delay={380} className="w-full pt-24">
+          <Reveal delay={340}>
+            <div className="flex flex-wrap items-center justify-center gap-32">
+              {[
+                ['0.8', 'mrad', 'nominal pointing error'],
+                ['20.9', 'mrad', 'lock window'],
+                ['11 / 11', '', 'scenarios hold'],
+              ].map(([value, unit, note]) => (
+                <div key={note} className="flex flex-col items-center gap-2">
+                  <span className="font-mono text-title font-medium text-ink">
+                    {value}
+                    {unit ? <span className="text-caption text-ink-faint"> {unit}</span> : null}
+                  </span>
+                  <span className="text-caption text-ink-muted">{note}</span>
+                </div>
+              ))}
+            </div>
+          </Reveal>
+
+          <Reveal delay={420} className="w-full pt-24">
             <LivePanel />
           </Reveal>
         </div>

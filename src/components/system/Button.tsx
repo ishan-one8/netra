@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 import { cx } from '../../lib/cx'
 
-type Variant = 'primary' | 'secondary' | 'ghost'
+type Variant = 'primary' | 'secondary' | 'ghost' | 'glow'
 
 type Props = {
   children: React.ReactNode
@@ -21,6 +21,8 @@ const VARIANT: Record<Variant, string> = {
   primary: 'bg-ink text-surface shadow-sm hover:shadow-lg',
   secondary: 'bg-surface text-ink border border-rule shadow-xs hover:border-rule-strong hover:shadow-sm',
   ghost: 'text-ink-muted hover:text-ink',
+  // For the hero, where the button has to hold its own against the bloom.
+  glow: 'bg-ink text-surface shadow-glow hover:shadow-glow',
 }
 
 const SIZE = {
