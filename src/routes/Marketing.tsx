@@ -1,4 +1,6 @@
+import { useState } from 'react'
 import { LinkField } from '../components/canvas/LinkField'
+import { OrbitalScene } from '../components/canvas/OrbitalScene'
 import { LivePanel } from '../components/marketing/LivePanel'
 import { ArchitectureFlow } from '../components/marketing/ArchitectureFlow'
 import { Applications } from '../components/marketing/Applications'
@@ -7,6 +9,7 @@ import { Team } from '../components/marketing/Team'
 import { Section } from '../components/layout/Section'
 import {
   Aurora,
+  StatusChip,
   Badge,
   Button,
   Card,
@@ -19,6 +22,7 @@ import {
   Spotlight,
 } from '../components/system'
 import { useInView } from '../lib/useInView'
+import type { TrackState } from '../sim/types'
 import { cx } from '../lib/cx'
 
 const SPEC_STRIP = [
@@ -92,13 +96,18 @@ function PipelineRow({ children }: { children: React.ReactNode }) {
 }
 
 export function Marketing() {
+  const [linkState, setLinkState] = useState<TrackState>('LOCKED')
+
   return (
     <main>
       {/* ---- Hero ---------------------------------------------------------- */}
-      <section className="relative w-full overflow-hidden pt-64 pb-64 lg:pt-96 lg:pb-96">
-        <Aurora />
+      <section className="relative flex min-h-[92svh] w-full flex-col justify-center overflow-hidden pt-64 pb-96">
+        <Aurora className="opacity-70" />
+        <div aria-hidden className="absolute inset-0">
+          <OrbitalScene onState={setLinkState} />
+        </div>
+        <span aria-hidden className="hero-scrim" />
         <Spotlight />
-        <div aria-hidden className="graph-paper fade-b absolute inset-0 opacity-60" />
 
         <div className="page-wide relative flex flex-col items-center gap-32 text-center">
           <Reveal>
@@ -115,7 +124,7 @@ export function Marketing() {
           />
 
           <Reveal delay={180}>
-            <p className="max-w-[56ch] text-body-lg text-ink-muted">
+            <p className="max-w-[52ch] text-body-lg text-ink-muted">
               Coarse alignment for mobile FSOC links, closed entirely in software. No camera, no
               gimbal, no optical bench.
             </p>
@@ -149,12 +158,34 @@ export function Marketing() {
               ))}
             </div>
           </Reveal>
+        </div>
 
-          <Reveal delay={420} className="w-full pt-24">
-            <LivePanel />
-          </Reveal>
+        {/* The scene's own link state, so the drawing is labelled rather than decorative. */}
+        <div className="page-wide pointer-events-none relative mt-40 flex justify-center">
+          <StatusChip state={linkState} />
         </div>
       </section>
+
+      {/* ---- The console, running ------------------------------------------ */}
+      <Section label="The console, running" glow="right">
+        <div className="flex flex-col gap-24 lg:flex-row lg:items-end lg:justify-between">
+          <Heading
+            size="md"
+            text={"This is not a screenshot.\nIt is the tracker."}
+            accent="tracker"
+            className="max-w-[20ch]"
+          />
+          <Reveal delay={120}>
+            <p className="max-w-[44ch] text-small text-ink-muted">
+              The same loop the simulator runs, on the same code, with decoys and dropouts switched
+              on. Watch it lose the terminal and bring it back.
+            </p>
+          </Reveal>
+        </div>
+        <Reveal delay={160}>
+          <LivePanel />
+        </Reveal>
+      </Section>
 
       <div className="border-y border-rule bg-surface py-16">
         <Marquee items={SPEC_STRIP} />

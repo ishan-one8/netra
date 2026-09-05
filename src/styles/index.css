@@ -749,3 +749,18 @@
     transform: none;
   }
 }
+
+/* A soft wash behind the hero's text column. The orbital scene runs across the
+   whole section, so the type needs its own ground rather than the scene needing
+   to avoid it. */
+.hero-scrim {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    58% 46% at 50% 42%,
+    rgba(250, 249, 247, 0.9) 0%,
+    rgba(250, 249, 247, 0.72) 45%,
+    rgba(250, 249, 247, 0) 100%
+  );
+}
