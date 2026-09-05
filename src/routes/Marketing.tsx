@@ -291,17 +291,16 @@ export function Marketing() {
       </Section>
 
       {/* ---- Evidence ------------------------------------------------------ */}
-      <Section id="evidence" label="Evidence" glow="left" className="night">
+      <Section id="evidence" label="Evidence" surface="surface" glow="left">
         <div className="flex flex-col gap-32 lg:flex-row lg:items-end lg:justify-between">
           <Heading
             size="lg"
             text={"We publish the bar\nbefore we clear it."}
             accent="before"
-            tone="light"
             className="max-w-[18ch]"
           />
           <Reveal delay={120}>
-            <p className="max-w-[46ch] text-body-lg text-night-muted">
+            <p className="max-w-[46ch] text-body-lg text-ink-muted">
               Thresholds are published before the run, not after. Every phase answers the same two
               questions: how well does it point while locked, and how long does it stay locked?
             </p>
@@ -315,10 +314,10 @@ export function Marketing() {
             ['Lock retention', '≥ 60%', 'share of the whole phase spent locked'],
           ].map(([label, value, note], i) => (
             <Reveal key={label} delay={i * 100}>
-              <div className="night-card flex h-full flex-col gap-8 rounded-lg p-24">
+              <div className="glass-card glass-card-hover flex h-full flex-col gap-8 rounded-lg p-24">
                 <Label>{label}</Label>
                 <span className="font-mono text-heading-sm font-medium text-beam">{value}</span>
-                <p className="text-caption text-night-muted">{note}</p>
+                <p className="text-caption text-ink-muted">{note}</p>
               </div>
             </Reveal>
           ))}
@@ -329,7 +328,7 @@ export function Marketing() {
             <Button to="/simulator" arrow variant="glow">
               Run the stress test
             </Button>
-            <span className="text-caption text-night-muted">
+            <span className="text-caption text-ink-muted">
               Takes about 50 seconds in the browser.
             </span>
           </div>

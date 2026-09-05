@@ -276,7 +276,7 @@ export function CameraViewport({
   return (
     <div
       className={cx(
-        'relative aspect-video w-full overflow-hidden rounded-md bg-sensor shadow-sm',
+        'relative aspect-video w-full overflow-hidden rounded-md border border-rule-strong bg-sensor shadow-sm',
         className,
       )}
     >
@@ -284,18 +284,18 @@ export function CameraViewport({
 
       <div className="pointer-events-none absolute inset-0 hidden flex-col justify-between p-16 sm:flex">
         <div className="flex items-start justify-between gap-16">
-          <span className="font-mono text-hud uppercase tracking-label text-surface/60">
+          <span className="font-mono text-hud uppercase tracking-label text-sensor-ink/60">
             Virtual camera · {sceneLabel}
           </span>
-          <span className="font-mono text-hud uppercase tracking-label text-surface/60">
+          <span className="font-mono text-hud uppercase tracking-label text-sensor-ink/60">
             Frame {String(frame).padStart(6, '0')}
           </span>
         </div>
         <div className="flex items-end justify-between gap-16">
-          <span className="font-mono text-hud uppercase tracking-label text-surface/60">
+          <span className="font-mono text-hud uppercase tracking-label text-sensor-ink/60">
             FOV 24° × 16° · 1280 px
           </span>
-          <span className="font-mono text-hud uppercase tracking-label text-surface/60">
+          <span className="font-mono text-hud uppercase tracking-label text-sensor-ink/60">
             {modeLabel}
           </span>
         </div>

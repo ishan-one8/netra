@@ -4,6 +4,7 @@ import { SiteFooter } from './components/layout/SiteFooter'
 import { Marketing } from './routes/Marketing'
 import { Simulator } from './routes/Simulator'
 import { ScrollProgress } from './components/system'
+import { ScrollRocket } from './components/canvas/ScrollRocket'
 
 export default function App() {
   const { pathname } = useLocation()
@@ -11,9 +12,11 @@ export default function App() {
   return (
     <div className="flex min-h-screen flex-col bg-paper">
       <ScrollProgress />
+      <ScrollRocket />
       {/* Said once, at the top, before anything is claimed. */}
-      <div className="w-full border-b border-rule bg-ink">
-        <p className="page-wide py-8 text-center font-mono text-hud uppercase tracking-label text-surface/70">
+      <div className="w-full border-b border-rule bg-surface">
+        <p className="page-wide flex items-center justify-center gap-8 py-8 text-center font-mono text-hud uppercase tracking-label text-ink-muted">
+          <span aria-hidden className="size-[5px] rounded-full bg-beam" />
           Software simulation · virtual camera and virtual beacon · no optical hardware involved
         </p>
       </div>

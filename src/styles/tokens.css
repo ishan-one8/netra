@@ -10,42 +10,42 @@
   --color-transparent: transparent;
   --color-current: currentColor;
 
-  --color-paper: #faf9f7;        /* page ground — warm, never grey */
-  --color-surface: #ffffff;      /* cards and raised panels */
+  --color-paper: #06060a;        /* deep space — cool, never navy-blue */
+  --color-surface: #0e0e14;      /* cards and raised panels */
   /* Tinted grounds. Sections alternate through these so the page has
-     temperature instead of one long stretch of white. */
-  --color-surface-warm: #fdf4ef;
-  --color-surface-cool: #f4f3fb;
-  --color-ink: #0a0a0b;          /* headings, primary text */
-  --color-ink-muted: #6b6b72;    /* body, secondary text */
-  --color-ink-faint: #a0a0a8;    /* captions, axis labels, disabled */
-  --color-rule: #e6e4de;         /* the only divider */
-  --color-rule-strong: #d3d0c8;  /* input tracks, chart baseline */
+     temperature instead of one long stretch of black. */
+  --color-surface-warm: #141010;
+  --color-surface-cool: #0b0c16;
+  --color-ink: #f6f6f8;          /* headings, primary text */
+  --color-ink-muted: #9c9caa;    /* body, secondary text */
+  --color-ink-faint: #61616f;    /* captions, axis labels, disabled */
+  --color-rule: rgba(255, 255, 255, 0.09);
+  --color-rule-strong: rgba(255, 255, 255, 0.18);
 
-  --color-beam: #ff4a1c;         /* the laser. One accent, used sparingly */
-  --color-beam-wash: #fff1ec;    /* the accent at 6% — chips and highlights */
+  --color-beam: #ff5a2c;         /* the laser. Warm accent on a cool ground */
+  --color-beam-wash: rgba(255, 90, 44, 0.13);
 
-  --color-lock: #067647;         /* LOCKED only */
-  --color-fault: #b42318;        /* TRACK LOST and errors only */
+  --color-lock: #35d39a;         /* LOCKED only */
+  --color-fault: #f87171;        /* TRACK LOST and errors only */
 
-  --color-sensor: #08080a;       /* the camera frame */
-  --color-night: #0b0b0d;        /* the one dark section — a held breath */
+  --color-sensor: #000000;       /* the camera frame */
+  /* Overlay ink for inside the frame. The frame is black whatever the page
+     does, so this cannot inherit the theme. */
+  --color-sensor-ink: #ffffff;
+  --color-night: #06060a;
   --color-night-rule: rgba(255, 255, 255, 0.1);
-  --color-night-muted: #8b8b93;
+  --color-night-muted: #9c9caa;
 
-  /* Aurora — the optical bloom behind the hero. Three hues from one story:
-     the laser, deep space, and the warm edge where they meet. Only ever seen
-     through heavy blur at low opacity, never as a flat fill. */
-  --color-aurora-beam: #ff4a1c;
+  /* Aurora — the optical bloom. On a dark ground these read as nebula rather
+     than as a wash, so they carry more saturation and far less opacity. */
+  --color-aurora-beam: #ff5a2c;
   --color-aurora-deep: #6d3bff;
   --color-aurora-warm: #ff9d6c;
 
-  /* Glass surfaces float over the aurora instead of hiding it. The edge is
-     ink-tinted, not white — a white keyline on a near-white ground is not an
-     edge at all, it is an invisible one. */
-  --color-glass: rgba(255, 255, 255, 0.66);
-  --color-glass-edge: rgba(10, 10, 11, 0.08);
-  --color-glass-edge-strong: rgba(10, 10, 11, 0.14);
+  /* Glass is now a lit film over the void rather than a frosted white pane. */
+  --color-glass: rgba(255, 255, 255, 0.045);
+  --color-glass-edge: rgba(255, 255, 255, 0.1);
+  --color-glass-edge-strong: rgba(255, 255, 255, 0.18);
 
   /* ---- Type faces -------------------------------------------------------- */
   --font-sans: 'Satoshi', 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
@@ -170,17 +170,14 @@
   --drop-shadow-*: initial;
   --text-shadow-*: initial;
 
-  --shadow-xs: 0 1px 2px rgba(10, 10, 11, 0.04);
-  --shadow-sm: 0 1px 3px rgba(10, 10, 11, 0.05), 0 1px 2px rgba(10, 10, 11, 0.03);
-  --shadow-md: 0 4px 16px rgba(10, 10, 11, 0.06), 0 1px 2px rgba(10, 10, 11, 0.04);
-  --shadow-lg: 0 16px 48px rgba(10, 10, 11, 0.08), 0 2px 8px rgba(10, 10, 11, 0.04);
-  --shadow-beam: 0 4px 16px rgba(255, 74, 28, 0.24);
-  --shadow-glow: 0 8px 32px rgba(255, 74, 28, 0.28), 0 2px 8px rgba(255, 74, 28, 0.16);
-  --shadow-glass: 0 24px 64px rgba(10, 10, 11, 0.1), 0 2px 8px rgba(10, 10, 11, 0.04),
-    inset 0 1px 0 rgba(255, 255, 255, 0.9);
-  /* The lit top edge is what sells a pane as glass rather than as a tint. */
-  --shadow-glass-sm: 0 2px 12px rgba(10, 10, 11, 0.05),
-    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.5);
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  --shadow-md: 0 8px 28px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  --shadow-lg: 0 24px 64px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  --shadow-beam: 0 4px 20px rgba(255, 90, 44, 0.35);
+  --shadow-glow: 0 0 0 1px rgba(255, 90, 44, 0.4), 0 8px 36px rgba(255, 90, 44, 0.35);
+  --shadow-glass: 0 24px 64px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.09);
+  --shadow-glass-sm: 0 2px 14px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.08);
 
   /* ---- Layout ------------------------------------------------------------ */
   --container-page: 1200px;

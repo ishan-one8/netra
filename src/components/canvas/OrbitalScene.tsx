@@ -43,11 +43,11 @@ export function OrbitalScene({
     let lastState: TrackState | null = null
 
     const seed = () => {
-      stars = Array.from({ length: Math.round((width * height) / 9000) }, () => ({
+      stars = Array.from({ length: Math.round((width * height) / 4200) }, () => ({
         x: Math.random(),
         y: Math.random() * 0.72,
-        r: Math.random() * 1.3 + 0.4,
-        a: Math.random() * 0.22 + 0.06,
+        r: Math.random() * 1.2 + 0.3,
+        a: Math.random() * 0.5 + 0.12,
       }))
       glyphs = Array.from({ length: 14 }, () => ({
         x: Math.random(),
@@ -87,9 +87,9 @@ export function OrbitalScene({
       const cx0 = width * 0.5
       const cy0 = height + R - height * 0.16
 
-      const ground = ctx.createLinearGradient(0, height * 0.78, 0, height)
-      ground.addColorStop(0, alpha('ink', 0.07))
-      ground.addColorStop(1, alpha('ink', 0.15))
+      const ground = ctx.createLinearGradient(0, height * 0.74, 0, height)
+      ground.addColorStop(0, 'rgba(0, 0, 0, 0.55)')
+      ground.addColorStop(1, 'rgba(0, 0, 0, 0.95)')
       ctx.fillStyle = ground
       ctx.beginPath()
       ctx.arc(cx0, cy0, R, Math.PI, Math.PI * 2)
@@ -98,14 +98,15 @@ export function OrbitalScene({
 
       // Atmosphere: the one place the beam colour behaves like light.
       const limbTop = cy0 - R
-      const air = ctx.createLinearGradient(0, limbTop - 26, 0, limbTop + 6)
+      const air = ctx.createLinearGradient(0, limbTop - 40, 0, limbTop + 4)
       air.addColorStop(0, alpha('beam', 0))
-      air.addColorStop(0.65, alpha('beam', 0.2))
-      air.addColorStop(1, alpha('beam', 0.38))
+      air.addColorStop(0.55, alpha('beam', 0.22))
+      air.addColorStop(0.9, alpha('beam', 0.6))
+      air.addColorStop(1, alpha('beam', 0.15))
       ctx.fillStyle = air
-      ctx.fillRect(0, limbTop - 26, width, 32)
+      ctx.fillRect(0, limbTop - 40, width, 46)
 
-      ctx.strokeStyle = alpha('ink', 0.38)
+      ctx.strokeStyle = alpha('ink', 0.55)
       ctx.lineWidth = 1.25
       ctx.beginPath()
       ctx.arc(cx0, cy0, R, Math.PI, Math.PI * 2)
@@ -138,7 +139,7 @@ export function OrbitalScene({
         ctx.lineTo(g.size * 0.88, g.size * 0.66)
         ctx.lineTo(-g.size * 0.88, g.size * 0.66)
         ctx.closePath()
-        ctx.strokeStyle = alpha('ink', 0.07 + ((Math.sin(g.phase) + 1) / 2) * 0.1)
+        ctx.strokeStyle = alpha('ink', 0.1 + ((Math.sin(g.phase) + 1) / 2) * 0.14)
         ctx.stroke()
         ctx.restore()
       }
@@ -146,7 +147,7 @@ export function OrbitalScene({
       // --- Ground station ---------------------------------------------------
       const stationX = width * 0.2
       const stationY = cy0 - Math.sqrt(Math.max(0, R * R - (stationX - cx0) ** 2))
-      ctx.strokeStyle = alpha('ink', 0.6)
+      ctx.strokeStyle = alpha('ink', 0.75)
       ctx.lineWidth = 1.25
       ctx.beginPath()
       ctx.moveTo(stationX, stationY)
@@ -226,7 +227,7 @@ export function OrbitalScene({
       ctx.translate(satX, satY)
       ctx.rotate(Math.sin(t * 0.0004) * 0.12)
       ctx.fillStyle = token('paper')
-      ctx.strokeStyle = alpha('ink', 0.7)
+      ctx.strokeStyle = alpha('ink', 0.85)
       ctx.lineWidth = 1.25
       ctx.fillRect(-6, -5, 12, 10)
       ctx.strokeRect(-6, -5, 12, 10)
@@ -235,7 +236,7 @@ export function OrbitalScene({
       ctx.restore()
 
       // Its shadow on the limb, so the pass has somewhere to be.
-      ctx.strokeStyle = alpha('ink', 0.14)
+      ctx.strokeStyle = alpha('ink', 0.2)
       ctx.setLineDash([2, 6])
       ctx.lineWidth = 1
       ctx.beginPath()
