@@ -1,19 +1,19 @@
 const USES = [
   {
     name: 'Ground-to-satellite links',
-    detail: 'A station tracking a LEO satellite across the sky needs continuous coarse alignment for the whole pass.',
+    detail: 'A station holding a LEO satellite across the whole pass.',
   },
   {
     name: 'Inter-satellite optical links',
-    detail: 'Satellite-to-satellite laser links demand precise pointing between two moving platforms.',
+    detail: 'Precise pointing between two moving platforms.',
   },
   {
     name: 'UAV and vehicle terminals',
-    detail: 'Mobile platforms carry the terminal through sway, vibration and handover between positions.',
+    detail: 'Sway, vibration, and handover between positions.',
   },
   {
     name: 'Terminal bring-up and tuning',
-    detail: 'A repeatable testbed for alignment algorithms before an optical bench is available.',
+    detail: 'A repeatable testbed before the bench exists.',
   },
 ] as const
 

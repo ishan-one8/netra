@@ -429,8 +429,8 @@
 .aurora-blob {
   position: absolute;
   border-radius: var(--radius-full);
-  filter: blur(90px);
-  opacity: 0.5;
+  filter: blur(85px);
+  opacity: 0.62;
   will-change: transform;
 }
 
@@ -449,7 +449,7 @@
   right: -8vw;
   top: -6vw;
   background: var(--color-aurora-deep);
-  opacity: 0.32;
+  opacity: 0.44;
   animation: aurora-drift-2 34s ease-in-out infinite alternate;
 }
 
@@ -459,7 +459,7 @@
   left: 22vw;
   top: 12vw;
   background: var(--color-aurora-warm);
-  opacity: 0.42;
+  opacity: 0.52;
   animation: aurora-drift-3 29s ease-in-out infinite alternate;
 }
 
@@ -556,11 +556,11 @@
 
 .section-glow span {
   position: absolute;
-  width: 60vw;
-  height: 34vw;
+  width: 66vw;
+  height: 38vw;
   border-radius: var(--radius-full);
-  filter: blur(110px);
-  opacity: 0.22;
+  filter: blur(100px);
+  opacity: 0.38;
   will-change: transform;
 }
 

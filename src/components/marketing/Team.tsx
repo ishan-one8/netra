@@ -5,12 +5,12 @@ import { Label } from '../system'
  * empty slot rather than as leftover placeholder text.
  */
 const TEAM = [
-  { code: 'CV', role: 'Detection', name: '', detail: 'Beacon detection, decoy rejection, robustness under noise.' },
-  { code: 'EST', role: 'Estimation', name: '', detail: 'Kalman state estimation, smoothing and look-ahead prediction.' },
-  { code: 'SIM', role: 'Simulation', name: '', detail: 'Virtual camera, motion models and disturbance physics.' },
-  { code: 'CTL', role: 'Control', name: '', detail: 'Pan/tilt servo model, slew limits, boresight loop.' },
-  { code: 'TST', role: 'Evaluation', name: '', detail: 'Stress-test design, thresholds and the evidence layer.' },
-  { code: 'UI', role: 'Console', name: '', detail: 'Mission console, telemetry, charts and integration.' },
+  { code: 'CV', role: 'Detection', name: '', detail: 'Detection, decoy rejection, robustness.' },
+  { code: 'EST', role: 'Estimation', name: '', detail: 'State estimation, smoothing, prediction.' },
+  { code: 'SIM', role: 'Simulation', name: '', detail: 'Virtual camera, motion, disturbance physics.' },
+  { code: 'CTL', role: 'Control', name: '', detail: 'Servo model, slew limits, boresight loop.' },
+  { code: 'TST', role: 'Evaluation', name: '', detail: 'Stress tests, thresholds, the evidence layer.' },
+  { code: 'UI', role: 'Console', name: '', detail: 'Console, telemetry, charts, integration.' },
 ] as const
 
 export function Team() {

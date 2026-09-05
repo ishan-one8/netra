@@ -4,32 +4,32 @@ const STACK = [
   {
     name: 'Python',
     role: 'Reference pipeline',
-    detail: 'The algorithm reference implementation — image processing, estimation and control.',
+    detail: 'Reference implementation of the whole pipeline.',
   },
   {
     name: 'OpenCV',
     role: 'Computer vision',
-    detail: 'Thresholding, connected components and measurement extraction on real frames.',
+    detail: 'Thresholding, blobs, measurement extraction.',
   },
   {
     name: 'NumPy',
     role: 'Numerical core',
-    detail: 'Matrix work behind detection statistics, filtering and the simulation itself.',
+    detail: 'The matrix work behind filtering and the sim.',
   },
   {
     name: 'PyTorch',
     role: 'Detection model',
-    detail: 'The CNN beacon detector, trained on labelled frames this simulator generates.',
+    detail: 'The CNN detector, trained on frames this sim makes.',
   },
   {
     name: 'Kalman filtering',
     role: 'State estimation',
-    detail: 'Constant-velocity model fusing noisy detections into position and velocity.',
+    detail: 'Constant-velocity fusion of noisy detections.',
   },
   {
     name: 'React · TypeScript · Canvas',
     role: 'This console',
-    detail: 'The interactive loop you are reading runs entirely in the browser, in real time.',
+    detail: 'This console. Real time, in your browser.',
   },
 ] as const
 

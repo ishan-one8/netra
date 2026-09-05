@@ -5,7 +5,7 @@ type Props = {
   id?: string
   label?: string
   children: React.ReactNode
-  surface?: 'paper' | 'surface'
+  surface?: 'paper' | 'surface' | 'warm' | 'cool'
   /** A soft field behind the section, alternating side to side down the page. */
   glow?: 'left' | 'right' | false
   className?: string
@@ -25,6 +25,8 @@ export function Section({
       className={cx(
         'relative w-full scroll-mt-64 overflow-hidden py-64 lg:py-96',
         surface === 'surface' && 'border-y border-rule bg-surface',
+        surface === 'warm' && 'border-y border-rule bg-surface-warm',
+        surface === 'cool' && 'border-y border-rule bg-surface-cool',
         className,
       )}
     >

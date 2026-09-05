@@ -32,16 +32,16 @@ const SPEC_STRIP = [
 
 const PROBLEM = [
   {
-    title: 'The beam is narrower than the error',
-    body: 'An FSOC beam is a few microradians wide. On a moving platform, ordinary pointing error is larger than the beam itself — so the link never closes at all.',
+    title: 'The beam is thinner than the error',
+    body: 'A few microradians wide. Ordinary pointing error is wider than the beam itself.',
   },
   {
-    title: 'Both ends are moving',
-    body: 'Satellites, UAVs and vehicle-mounted terminals all drift, vibrate and rotate. The remote terminal has to stay inside the camera field of view while everything moves.',
+    title: 'Both ends keep moving',
+    body: 'Satellites, UAVs, vehicles. Everything drifts, and the terminal still has to stay in frame.',
   },
   {
     title: 'Testing it needs the hardware',
-    body: 'Developing PAT algorithms on real equipment means expensive cameras, pan-tilt mechanisms and optical benches — and every experiment costs schedule.',
+    body: 'Cameras, gimbals, optical benches. Every experiment costs weeks of schedule.',
   },
 ] as const
 
@@ -49,26 +49,26 @@ const SYSTEM = [
   {
     badge: 'Stage one',
     title: 'A virtual camera',
-    body: 'A physics-based renderer produces the frames a real FSOC sensor would return — beacon irradiance, atmospheric scintillation, platform vibration, detector noise and cloud occlusion.',
+    body: 'Renders what the sensor would see. Irradiance, scintillation, vibration, noise, cloud.',
   },
   {
     badge: 'Stage two',
     title: 'A detector that learns',
-    body: 'A lightweight CNN locates the remote terminal in every frame and rejects false candidates — stars, sun glint, specular reflections — that simple thresholding cannot separate.',
+    body: 'Finds the terminal in every frame. Throws away the stars, the glints, the reflections.',
   },
   {
     badge: 'Stage three',
     title: 'A loop that holds',
-    body: 'A Kalman estimator maintains the track through noise and brief dropouts, then hands a locked pointing vector to the fine-alignment stage.',
+    body: 'Holds the track through noise and dropouts, then hands the lock to fine alignment.',
   },
 ] as const
 
 const PIPELINE = [
-  { index: '01', name: 'Detection', detail: 'Every frame is scanned for bright point sources. Each becomes a candidate with a score.' },
-  { index: '02', name: 'Association', detail: 'Candidates are gated against the track. Decoys lose, and the loop keeps the right one.' },
-  { index: '03', name: 'Estimation', detail: 'Noisy measurements become a smooth position and velocity in the platform frame.' },
-  { index: '04', name: 'Prediction', detail: 'The estimate is projected forward so the gimbal leads the target instead of chasing it.' },
-  { index: '05', name: 'Steering', detail: 'A rate-limited pan/tilt command drives the boresight — the coarse alignment itself.' },
+  { index: '01', name: 'Detection', detail: 'Bright sources become scored candidates.' },
+  { index: '02', name: 'Association', detail: 'Gated against the track. Decoys lose.' },
+  { index: '03', name: 'Estimation', detail: 'Noise becomes position and velocity.' },
+  { index: '04', name: 'Prediction', detail: 'Projected forward, so the gimbal leads.' },
+  { index: '05', name: 'Steering', detail: 'A rate-limited command drives the boresight.' },
 ] as const
 
 function PipelineItem({ node }: { node: (typeof PIPELINE)[number] }) {
@@ -116,9 +116,8 @@ export function Marketing() {
 
           <Reveal delay={180}>
             <p className="max-w-[56ch] text-body-lg text-ink-muted">
-              An AI-based virtual camera tracking system for the coarse-alignment stage of mobile
-              FSOC links — developed, stress-tested and measured entirely in software, with no
-              camera, no pan-tilt rig and no optical bench.
+              Coarse alignment for mobile FSOC links, closed entirely in software. No camera, no
+              gimbal, no optical bench.
             </p>
           </Reveal>
 
@@ -162,7 +161,7 @@ export function Marketing() {
       </div>
 
       {/* ---- Problem ------------------------------------------------------- */}
-      <Section id="problem" label="The problem" glow="left">
+      <Section id="problem" label="The problem" surface="warm" glow="left">
         <div className="flex flex-col gap-32 lg:flex-row lg:items-end lg:justify-between">
           <Heading
             size="lg"
@@ -172,9 +171,8 @@ export function Marketing() {
           />
           <Reveal delay={120}>
             <p className="max-w-[46ch] text-body-lg text-ink-muted">
-              Coarse alignment is the stage where a transmitting terminal must first locate the
-              remote terminal and keep it inside its camera field of view. Get it wrong and fine
-              alignment never gets a chance to run.
+              Coarse alignment is where the terminal has to find its partner and keep it in the
+              camera's field of view. Get it wrong and fine alignment never runs.
             </p>
           </Reveal>
         </div>
@@ -218,13 +216,9 @@ export function Marketing() {
           className="max-w-[18ch]"
         />
 
-        <div className="grid gap-16 lg:grid-cols-3 lg:grid-rows-2">
+        <div className="grid gap-16 lg:grid-cols-3">
           {SYSTEM.map((item, i) => (
-            <Reveal
-              key={item.title}
-              delay={i * 100}
-              className={cx('h-full', i === 0 && 'lg:row-span-2')}
-            >
+            <Reveal key={item.title} delay={i * 100} className="h-full">
               <div className="glass-card glass-card-hover flex h-full flex-col gap-16 rounded-lg p-24 lg:p-32">
                 <Badge tone="beam">{item.badge}</Badge>
                 <h3 className="font-display text-title font-medium text-ink">{item.title}</h3>
@@ -239,9 +233,8 @@ export function Marketing() {
             <div className="flex flex-col gap-4">
               <Label tone="beam">Why it can be trained at all</Label>
               <p className="max-w-[62ch] text-small text-ink-muted">
-                Every simulated frame comes with the terminal's true position, so the dataset the
-                detector needs is generated by the same tool that tests it — perfectly labelled,
-                in unlimited quantity.
+                Every frame comes with the terminal's true position. The tool that tests the
+                detector also generates its training set — perfectly labelled, unlimited.
               </p>
             </div>
             <Button to="/simulator" variant="secondary" arrow>
@@ -278,9 +271,8 @@ export function Marketing() {
           />
           <Reveal delay={120}>
             <p className="max-w-[46ch] text-body-lg text-night-muted">
-              Thresholds are published before the run, not chosen after it, and every phase is
-              graded on the same two questions: when the loop says it is locked, how well does it
-              point — and how much of the phase does it stay locked? No phase gets an easier bar.
+              Thresholds are published before the run, not after. Every phase answers the same two
+              questions: how well does it point while locked, and how long does it stay locked?
             </p>
           </Reveal>
         </div>
@@ -314,7 +306,7 @@ export function Marketing() {
       </Section>
 
       {/* ---- Architecture --------------------------------------------------- */}
-      <Section id="architecture" label="System architecture" glow="left">
+      <Section id="architecture" label="System architecture" surface="cool" glow="left">
         <div className="flex flex-col gap-32 lg:flex-row lg:items-end lg:justify-between">
           <Heading
             size="lg"
@@ -324,9 +316,8 @@ export function Marketing() {
           />
           <Reveal delay={120}>
             <p className="max-w-[46ch] text-body-lg text-ink-muted">
-              Each stage is a module boundary on purpose. When real hardware arrives, the virtual
-              camera is replaced by a frame grabber and the gimbal controller by a servo driver —
-              everything between them stays.
+              Every stage is a module boundary. Swap the virtual camera for a frame grabber and
+              the controller for a servo driver — everything between them stays.
             </p>
           </Reveal>
         </div>
@@ -334,7 +325,7 @@ export function Marketing() {
       </Section>
 
       {/* ---- Technology ------------------------------------------------------ */}
-      <Section id="technology" label="Technology" surface="surface" glow="right">
+      <Section id="technology" label="Technology" glow="right">
         <Heading
           size="lg"
           text={"Mature parts,\nno exotic frameworks."}
@@ -345,7 +336,7 @@ export function Marketing() {
       </Section>
 
       {/* ---- Applications ---------------------------------------------------- */}
-      <Section id="applications" label="Where it applies" glow="left">
+      <Section id="applications" label="Where it applies" surface="warm" glow="left">
         <Heading
           size="lg"
           text={"Anywhere a narrow beam has\nto follow a moving target."}
@@ -355,15 +346,14 @@ export function Marketing() {
         <Applications />
         <Reveal delay={160}>
           <p className="max-w-[70ch] text-small text-ink-muted">
-            These are the domains the tracking loop applies to. NETRA itself is a simulation — it
-            demonstrates and measures the loop inside a virtual environment, and is not connected
-            to any operational terminal.
+            These are the domains the loop applies to. NETRA is a simulation, not connected to any
+            operational terminal.
           </p>
         </Reveal>
       </Section>
 
       {/* ---- Scope ------------------------------------------------------------ */}
-      <Section id="scope" label="Scope" surface="surface" glow="right">
+      <Section id="scope" label="Scope" surface="cool" glow="right">
         <div className="grid gap-32 lg:grid-cols-2 lg:gap-64">
           <Heading
             size="md"
@@ -418,7 +408,7 @@ export function Marketing() {
       </Section>
 
       {/* ---- Close --------------------------------------------------------- */}
-      <Section label="Mission context" surface="surface" glow="right">
+      <Section label="Mission context" surface="warm" glow="right">
         <div className="grid gap-40 lg:grid-cols-2 lg:gap-64">
           <div className="flex flex-col gap-24">
             <Heading
