@@ -50,7 +50,9 @@ export function SiteNav() {
         'sticky top-0 z-50 transition-all duration-300 ease-out',
         scrolled || onSimulator
           ? 'border-b border-rule bg-paper/70 backdrop-blur-xl'
-          : 'border-b border-transparent',
+          // Not bare, even at the top: the moon is behind this strip, and the
+          // links have to stay legible against the brightest thing on the page.
+          : 'border-b border-transparent bg-paper/65 backdrop-blur-md',
       )}
     >
       <nav className="page-wide flex items-center justify-between gap-24 py-12">

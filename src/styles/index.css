@@ -780,7 +780,7 @@
   position: absolute;
   right: 6vw;
   top: 0;
-  width: 44px;
+  width: 60px;
   will-change: transform;
   transition: opacity 400ms var(--ease-out);
 }
@@ -789,7 +789,7 @@
 .rocket-trail {
   position: absolute;
   left: 50%;
-  bottom: calc(100% - 12px);
+  bottom: calc(100% - 14px);
   width: 1px;
   height: var(--trail, 20vh);
   transform: translateX(-50%);
@@ -810,9 +810,9 @@
 .rocket-flame {
   position: absolute;
   left: 50%;
-  top: 118px;
-  width: 14px;
-  height: 46px;
+  top: 154px;
+  width: 18px;
+  height: 58px;
   transform: translateX(-50%);
   border-radius: 0 0 50% 50%;
   background: linear-gradient(
@@ -828,9 +828,9 @@
 .rocket-glow {
   position: absolute;
   left: 50%;
-  top: 104px;
-  width: 120px;
-  height: 120px;
+  top: 136px;
+  width: 152px;
+  height: 152px;
   transform: translate(-50%, 0);
   border-radius: var(--radius-full);
   background: radial-gradient(circle, rgba(255, 90, 44, 0.28), transparent 68%);
@@ -876,4 +876,16 @@
 .site-shell {
   position: relative;
   z-index: 1;
+}
+
+/* ---- Moon -----------------------------------------------------------------
+   Above the starfield, below everything the site draws. Redrawn only on
+   resize; scrolling touches opacity and transform, which the compositor owns. */
+.moon-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  display: block;
+  will-change: opacity, transform;
 }
