@@ -5,29 +5,24 @@ type Props = {
   id?: string
   label?: string
   children: React.ReactNode
-  /** Charcoal turns the whole section into an elevated surface. */
-  surface?: 'void' | 'charcoal'
+  surface?: 'paper' | 'surface'
   className?: string
 }
 
-/**
- * Full-bleed on the canvas, content bounded to 1200px, 96–120px of vertical
- * breathing room. Sections alternate between the void and a charcoal surface.
- */
-export function Section({ id, label, children, surface = 'void', className }: Props) {
+export function Section({ id, label, children, surface = 'paper', className }: Props) {
   return (
     <section
       id={id}
       className={cx(
-        'w-full py-96 lg:py-120',
-        surface === 'charcoal' && 'bg-charcoal',
+        'w-full scroll-mt-64 py-64 lg:py-96',
+        surface === 'surface' && 'border-y border-rule bg-surface',
         className,
       )}
     >
-      <div className="page flex flex-col gap-40">
+      <div className="page-wide flex flex-col gap-40">
         {label ? (
           <Reveal>
-            <Label rule>{label}</Label>
+            <Label tone="beam">{label}</Label>
           </Reveal>
         ) : null}
         {children}

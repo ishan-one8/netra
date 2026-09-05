@@ -9,8 +9,9 @@ type Props = {
   unit?: string
   decimals?: number
   size?: 'md' | 'lg'
-  /** 0–1. Draws a 2px bar beneath the value. */
+  /** 0–1. Draws a thin meter beneath the value. */
   meter?: number
+  meterTone?: 'beam' | 'lock' | 'fault'
   className?: string
 }
 
@@ -45,10 +46,8 @@ function useCountUp(value: number) {
   return prefersReducedMotion ? value : shown
 }
 
-/**
- * Tracked uppercase label, hairline-weight number, quiet unit. Figures are
- * tabular so the value cannot shift width as it updates.
- */
+const METER = { beam: 'bg-beam', lock: 'bg-lock', fault: 'bg-fault' } as const
+
 export function TelemetryReadout({
   label,
   value,
@@ -56,6 +55,7 @@ export function TelemetryReadout({
   decimals = 2,
   size = 'md',
   meter,
+  meterTone = 'beam',
   className,
 }: Props) {
   const shown = useCountUp(value)
@@ -66,18 +66,21 @@ export function TelemetryReadout({
       <div className="flex items-baseline gap-8">
         <span
           className={cx(
-            'tabular font-light text-pure-white',
-            size === 'lg' ? 'text-heading' : 'text-subheading',
+            'font-mono font-medium text-ink',
+            size === 'lg' ? 'text-readout-lg' : 'text-readout',
           )}
         >
           {shown.toFixed(decimals)}
         </span>
-        {unit ? <span className="text-body text-smoke">{unit}</span> : null}
+        {unit ? <span className="font-mono text-caption text-ink-faint">{unit}</span> : null}
       </div>
       {meter === undefined ? null : (
-        <span aria-hidden className="mt-4 block h-[2px] w-full rounded-full bg-graphite">
+        <span aria-hidden className="mt-4 block h-[3px] w-full rounded-full bg-rule">
           <span
-            className="block h-[2px] rounded-full bg-lamp-cream transition-[width] duration-[300ms] ease-sequel"
+            className={cx(
+              'block h-[3px] rounded-full transition-[width] duration-300 ease-out',
+              METER[meterTone],
+            )}
             style={{ width: `${Math.min(100, Math.max(0, meter * 100))}%` }}
           />
         </span>

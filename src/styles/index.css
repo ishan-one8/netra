@@ -9,24 +9,30 @@
 
   body {
     margin: 0;
-    background: var(--color-void-black);
-    color: var(--color-pure-white);
-    font-family: var(--font-visuelt);
+    background: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
     font-size: var(--text-body);
     font-weight: var(--font-weight-regular);
-    line-height: 1.5;
+    line-height: 1.6;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
 
+  /* If the system measured it, it is mono — and it never changes width mid-update. */
+  .font-mono {
+    font-variant-numeric: tabular-nums;
+  }
+
   ::selection {
-    background: var(--color-lamp-cream);
-    color: var(--color-void-black);
+    background: var(--color-beam);
+    color: var(--color-surface);
   }
 
   :focus-visible {
-    outline: 1px solid var(--color-lamp-cream);
-    outline-offset: 3px;
+    outline: 2px solid var(--color-beam);
+    outline-offset: 2px;
+    border-radius: var(--radius-xs);
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -43,7 +49,7 @@
   }
 }
 
-/* Content column. Sections are full-bleed on the void; only the content is bounded. */
+/* Content column. */
 @utility page {
   width: 100%;
   max-width: var(--container-page);
@@ -51,80 +57,96 @@
   padding-inline: var(--spacing-24);
 }
 
-/* Frosted glass — the inner white edge is what makes it read as glass catching
-   imaginary light rather than a flat translucent chip. */
-@utility glass {
-  background: var(--color-glass);
-  backdrop-filter: blur(20px) saturate(1.4);
-  -webkit-backdrop-filter: blur(20px) saturate(1.4);
-  box-shadow: var(--shadow-xl);
+@utility page-wide {
+  width: 100%;
+  max-width: var(--container-wide);
+  margin-inline: auto;
+  padding-inline: var(--spacing-24);
 }
 
-/* Readability layer under text that sits over the hero canvas. The only
-   gradient in the system. */
-@utility scrim {
-  background: linear-gradient(to bottom, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.55) 100%);
+/* Engineering-paper ruling. Barely visible — it should read as texture, not
+   as a grid the eye has to fight. */
+@utility graph-paper {
+  background-image:
+    linear-gradient(to right, var(--color-rule) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--color-rule) 1px, transparent 1px);
+  background-size: 32px 32px;
+  opacity: 0.4;
 }
 
-/* Numbers that update in place must not shift width while they do it. Sequel
-   has no monospace face, so the sans carries tabular figures instead. */
+/* A soft fade so a texture or canvas never ends on a hard edge. */
+@utility fade-b {
+  mask-image: linear-gradient(to bottom, black 0%, black 55%, transparent 100%);
+}
+
 @utility tabular {
   font-variant-numeric: tabular-nums;
-  font-feature-settings: 'tnum' 1;
 }
 
 /* ---- Motion ---------------------------------------------------------------
-   Slow-out easing throughout. Opacity, transform, background and border only —
-   never hue, never spring, never bounce. */
+   Everything eases out. Opacity and transform only. */
 
-.netra-reveal {
+.reveal {
   opacity: 0;
-  transform: translateY(16px);
+  transform: translateY(20px);
   transition:
-    opacity 600ms var(--ease-sequel),
-    transform 600ms var(--ease-sequel);
+    opacity 700ms var(--ease-out),
+    transform 700ms var(--ease-out);
 }
 
-.netra-reveal.is-in {
+.reveal.is-in {
   opacity: 1;
   transform: none;
 }
 
-.netra-word {
+.reveal-word {
   display: inline-block;
   opacity: 0;
-  transform: translateY(14px);
+  transform: translateY(18px);
   transition:
-    opacity 600ms var(--ease-sequel),
-    transform 600ms var(--ease-sequel);
+    opacity 650ms var(--ease-out),
+    transform 650ms var(--ease-out);
   white-space: pre;
 }
 
-.netra-word.is-in {
+.reveal-word.is-in {
   opacity: 1;
   transform: none;
 }
 
-.netra-rule-draw {
+.rule-draw {
   transform: scaleX(0);
   transform-origin: left center;
-  transition: transform 900ms var(--ease-sequel);
+  transition: transform 900ms var(--ease-out);
 }
 
-.netra-rule-draw.is-in {
+.rule-draw.is-in {
   transform: scaleX(1);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .netra-reveal,
-  .netra-word,
-  .netra-rule-draw {
+  .reveal,
+  .reveal-word,
+  .rule-draw {
     opacity: 1;
     transform: none;
   }
 }
 
-/* The one long-duration motion in the system. */
+@keyframes netra-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}
+
+.pulse-dot {
+  animation: netra-pulse 2s var(--ease-in-out) infinite;
+}
+
 @keyframes netra-marquee {
   from {
     transform: translateX(0);
@@ -134,21 +156,36 @@
   }
 }
 
-.netra-marquee-track {
+.marquee-track {
   display: flex;
   width: max-content;
-  animation: netra-marquee 45s linear infinite;
+  animation: netra-marquee 60s linear infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .netra-marquee-track {
+  .marquee-track {
     animation: none;
   }
 }
 
+@keyframes netra-route-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.route-in {
+  animation: netra-route-in 450ms var(--ease-out) both;
+}
+
 /* ---- Controls -------------------------------------------------------------
-   A graphite track, a cream fill, a white thumb. The hit area is 44px on every
-   viewport; only the paint is thin. */
+   A thin track, a beam-coloured fill, a white thumb with a real edge. The hit
+   area is 44px on every viewport. */
 .control-slider {
   -webkit-appearance: none;
   appearance: none;
@@ -160,49 +197,51 @@
 }
 
 .control-slider::-webkit-slider-runnable-track {
-  height: 2px;
+  height: 3px;
   border-radius: var(--radius-full);
   background: linear-gradient(
     to right,
-    var(--color-lamp-cream) 0 var(--fill, 0%),
-    var(--color-graphite) var(--fill, 0%) 100%
+    var(--color-beam) 0 var(--fill, 0%),
+    var(--color-rule-strong) var(--fill, 0%) 100%
   );
 }
 
 .control-slider::-moz-range-track {
-  height: 2px;
+  height: 3px;
   border-radius: var(--radius-full);
-  background: var(--color-graphite);
+  background: var(--color-rule-strong);
 }
 
 .control-slider::-moz-range-progress {
-  height: 2px;
+  height: 3px;
   border-radius: var(--radius-full);
-  background: var(--color-lamp-cream);
+  background: var(--color-beam);
 }
 
 .control-slider::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 12px;
-  height: 12px;
+  width: 16px;
+  height: 16px;
   border-radius: var(--radius-full);
-  background: var(--color-pure-white);
-  border: none;
-  margin-top: -5px;
-  transition: transform 250ms var(--ease-sequel);
+  background: var(--color-surface);
+  border: 1.5px solid var(--color-beam);
+  box-shadow: var(--shadow-sm);
+  margin-top: -6.5px;
+  transition: transform 200ms var(--ease-out);
 }
 
 .control-slider::-moz-range-thumb {
-  width: 12px;
-  height: 12px;
+  width: 16px;
+  height: 16px;
   border-radius: var(--radius-full);
-  background: var(--color-pure-white);
-  border: none;
+  background: var(--color-surface);
+  border: 1.5px solid var(--color-beam);
 }
 
-.control-slider:hover::-webkit-slider-thumb {
-  transform: scale(1.25);
+.control-slider:hover::-webkit-slider-thumb,
+.control-slider:focus-visible::-webkit-slider-thumb {
+  transform: scale(1.15);
 }
 
 .control-slider:disabled {
@@ -212,21 +251,21 @@
 
 .log-scroll {
   scrollbar-width: thin;
-  scrollbar-color: var(--color-graphite) transparent;
+  scrollbar-color: var(--color-rule-strong) transparent;
 }
 
 .log-scroll::-webkit-scrollbar {
-  width: 4px;
+  width: 6px;
 }
 
 .log-scroll::-webkit-scrollbar-thumb {
-  background: var(--color-graphite);
+  background: var(--color-rule-strong);
   border-radius: var(--radius-full);
 }
 
 /* ---- Simulator layout -----------------------------------------------------
-   Regions are placed by name so each breakpoint states its own reading order
-   without duplicating markup. */
+   Named regions so each breakpoint declares its own reading order without
+   duplicating markup. */
 .sim-grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
@@ -235,7 +274,7 @@
     'telemetry'
     'controls'
     'log';
-  gap: var(--spacing-24);
+  gap: var(--spacing-20);
 }
 
 .sim-area-controls {
@@ -253,48 +292,11 @@
 
 @media (min-width: 1024px) {
   .sim-grid {
-    grid-template-columns: 300px minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-columns: 320px minmax(0, 1fr) minmax(0, 1fr);
     grid-template-areas:
       'controls main main'
       'controls telemetry log';
     align-items: start;
+    gap: var(--spacing-24);
   }
-}
-
-@media (min-width: 1280px) {
-  .sim-grid {
-    grid-template-columns: 300px minmax(0, 1fr) minmax(0, 1fr);
-    gap: var(--spacing-32);
-  }
-}
-
-/* A held breath on a chip that is still looking. Opacity only. */
-@keyframes netra-pulse {
-  0%,
-  100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.55;
-  }
-}
-
-.netra-pulse {
-  animation: netra-pulse 2.4s var(--ease-sequel) infinite;
-}
-
-/* Route change fades rather than cuts. */
-@keyframes netra-route-in {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-
-.netra-route-in {
-  animation: netra-route-in 400ms var(--ease-sequel) both;
 }

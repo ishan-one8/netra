@@ -3,12 +3,11 @@ import { CameraViewport } from '../components/simulator/CameraViewport'
 import { EventLog } from '../components/simulator/EventLog'
 import { ResidualChart } from '../components/simulator/ResidualChart'
 import {
+  Button,
   Card,
   ControlRow,
-  GhostButton,
   Hairline,
   Label,
-  PrimaryAction,
   SegmentedControl,
   StatusChip,
   TelemetryReadout,
@@ -19,7 +18,7 @@ import type { Scene, TrackerMode } from '../sim/useTracker'
 const SCENES = [
   { value: 'leo', label: 'LEO pass' },
   { value: 'geo', label: 'GEO hold' },
-  { value: 'ground', label: 'Ground link' },
+  { value: 'ground', label: 'Ground' },
 ] as const satisfies ReadonlyArray<{ value: Scene; label: string }>
 
 const MODES = [
@@ -48,7 +47,7 @@ export function Simulator() {
     running,
   })
 
-  // Space holds the loop, R restarts the run — the two things you reach for most.
+  // Space holds the loop, R restarts the run.
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
       const target = event.target as HTMLElement | null
@@ -67,20 +66,20 @@ export function Simulator() {
   const modeLabel = MODES.find((m) => m.value === mode)?.label ?? ''
 
   const controls = (
-    <div className="flex flex-col gap-32">
-      <div className="flex flex-col gap-12">
+    <div className="flex flex-col gap-24">
+      <div className="flex flex-col gap-8">
         <Label>Scene</Label>
         <SegmentedControl label="Scene" options={SCENES} value={scene} onChange={setScene} />
       </div>
 
-      <div className="flex flex-col gap-12">
+      <div className="flex flex-col gap-8">
         <Label>Estimator</Label>
         <SegmentedControl label="Estimator" options={MODES} value={mode} onChange={setMode} />
       </div>
 
       <Hairline />
 
-      <div className="flex flex-col gap-8">
+      <div className="flex flex-col gap-12">
         <Label>Channel</Label>
         <ControlRow
           label="Turbulence"
@@ -88,6 +87,7 @@ export function Simulator() {
           min={0}
           max={100}
           unit="%"
+          hint="Atmospheric scintillation and beam wander"
           onChange={setTurbulence}
         />
         <ControlRow
@@ -96,36 +96,60 @@ export function Simulator() {
           min={0}
           max={100}
           unit="%"
+          hint="Vibration of the mount the terminal sits on"
           onChange={setJitter}
         />
       </div>
 
-      <div className="flex flex-col gap-8">
+      <div className="flex flex-col gap-12">
         <Label>Detector</Label>
-        <ControlRow label="Gain" value={gain} min={0} max={100} unit="%" onChange={setGain} />
+        <ControlRow
+          label="Gain"
+          value={gain}
+          min={0}
+          max={100}
+          unit="%"
+          hint="Higher gain lifts SNR and suppresses noise"
+          onChange={setGain}
+        />
         <ControlRow
           label="Sweep rate"
           value={sweep}
           min={0}
           max={100}
           unit="%"
+          hint="How fast the search volume is covered"
           onChange={setSweep}
         />
       </div>
 
-      <div className="flex flex-wrap items-center gap-12">
-        <PrimaryAction onClick={() => setRunning((r) => !r)}>
+      <Hairline />
+
+      <div className="flex flex-wrap items-center gap-8">
+        <Button onClick={() => setRunning((r) => !r)}>
           {running ? 'Hold the loop' : 'Run the loop'}
-        </PrimaryAction>
-        <GhostButton onClick={reset}>Reset</GhostButton>
+        </Button>
+        <Button variant="secondary" onClick={reset}>
+          Reset
+        </Button>
       </div>
 
-      <p className="text-label-sm font-medium uppercase text-smoke">Space holds · R resets</p>
+      <p className="font-mono text-hud uppercase tracking-label text-ink-faint">
+        Space holds · R resets
+      </p>
     </div>
   )
 
   return (
-    <main className="page pt-96 pb-96">
+    <main className="page-wide py-24 lg:py-32">
+      <div className="mb-24 flex flex-wrap items-end justify-between gap-16">
+        <div className="flex flex-col gap-4">
+          <Label tone="beam">Coarse alignment · virtual camera</Label>
+          <h1 className="text-heading-sm font-medium tracking-tight text-ink">Tracking simulator</h1>
+        </div>
+        <StatusChip state={state} />
+      </div>
+
       <div className="sim-grid">
         {/* ---- Controls -------------------------------------------------- */}
         <aside className="sim-area-controls">
@@ -133,37 +157,38 @@ export function Simulator() {
             type="button"
             aria-expanded={controlsOpen}
             onClick={() => setControlsOpen((open) => !open)}
-            className="flex min-h-[44px] w-full items-center justify-between gap-16 lg:hidden"
+            className="mb-12 flex min-h-[44px] w-full items-center justify-between gap-16 rounded-md border border-rule bg-surface px-16 shadow-xs lg:hidden"
           >
-            <Label rule>Controls</Label>
-            <span className="text-body text-smoke">{controlsOpen ? '—' : '+'}</span>
+            <Label>Controls</Label>
+            <span className="text-body text-ink-muted">{controlsOpen ? '−' : '+'}</span>
           </button>
 
-          <Card className={controlsOpen ? 'mt-16 block p-24' : 'hidden p-24 lg:block'}>
-            {controls}
-          </Card>
+          <Card className={controlsOpen ? 'block p-20' : 'hidden p-20 lg:block'}>{controls}</Card>
         </aside>
 
         {/* ---- Viewport --------------------------------------------------- */}
-        <section className="sim-area-main flex flex-col gap-16">
-          <div className="flex flex-wrap items-center justify-between gap-16">
-            <StatusChip state={state} />
-            <span className="text-label-sm font-medium uppercase text-smoke">
-              {sceneLabel} · {modeLabel} · {running ? 'Running' : 'Held'}
-            </span>
-          </div>
-
-          <CameraViewport
-            snapshotRef={snapshotRef}
-            modeLabel={modeLabel}
-            sceneLabel={sceneLabel}
-            frame={telemetry.frame}
-          />
+        <section className="sim-area-main">
+          <Card className="p-12 sm:p-16">
+            <div className="flex flex-wrap items-center justify-between gap-12 px-4 pb-12">
+              <span className="font-mono text-hud uppercase tracking-label text-ink-faint">
+                {sceneLabel} · {modeLabel}
+              </span>
+              <span className="font-mono text-hud uppercase tracking-label text-ink-faint">
+                {running ? 'Running' : 'Held'}
+              </span>
+            </div>
+            <CameraViewport
+              snapshotRef={snapshotRef}
+              modeLabel={modeLabel}
+              sceneLabel={sceneLabel}
+              frame={telemetry.frame}
+            />
+          </Card>
         </section>
 
         {/* ---- Telemetry --------------------------------------------------- */}
         <section className="sim-area-telemetry">
-          <Card className="flex flex-col gap-32 p-24">
+          <Card className="flex flex-col gap-24 p-20">
             <TelemetryReadout
               label="Residual, RMS"
               value={telemetry.rmsError}
@@ -171,11 +196,14 @@ export function Simulator() {
               decimals={2}
               size="lg"
               meter={Math.min(1, telemetry.rmsError / 60)}
+              meterTone={
+                state === 'TRACK_LOST' ? 'fault' : state === 'LOCKED' ? 'lock' : 'beam'
+              }
             />
 
             <Hairline />
 
-            <div className="grid grid-cols-2 gap-24">
+            <div className="grid grid-cols-2 gap-20">
               <TelemetryReadout label="Azimuth" value={telemetry.azimuth} unit="°" />
               <TelemetryReadout label="Elevation" value={telemetry.elevation} unit="°" />
               <TelemetryReadout label="Range" value={telemetry.range} unit="km" decimals={1} />
@@ -194,8 +222,10 @@ export function Simulator() {
               <TelemetryReadout label="SNR" value={telemetry.snr} unit="dB" decimals={1} />
             </div>
 
-            <div className="flex flex-col gap-16">
-              <Label rule>Residual · confidence</Label>
+            <Hairline />
+
+            <div className="flex flex-col gap-12">
+              <Label>Residual · confidence</Label>
               <ResidualChart data={history} />
             </div>
           </Card>
@@ -203,8 +233,8 @@ export function Simulator() {
 
         {/* ---- Log --------------------------------------------------------- */}
         <section className="sim-area-log">
-          <Card className="flex flex-col gap-16 p-24">
-            <Label rule>Event log</Label>
+          <Card className="flex flex-col gap-16 p-20">
+            <Label>Event log</Label>
             <EventLog entries={log} />
           </Card>
         </section>

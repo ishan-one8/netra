@@ -3,12 +3,18 @@
  * a component, read the same custom properties the rest of the system uses.
  */
 export type TokenName =
-  | 'void-black'
-  | 'pure-white'
-  | 'charcoal'
-  | 'graphite'
-  | 'lamp-cream'
-  | 'smoke'
+  | 'paper'
+  | 'surface'
+  | 'ink'
+  | 'ink-muted'
+  | 'ink-faint'
+  | 'rule'
+  | 'rule-strong'
+  | 'beam'
+  | 'beam-wash'
+  | 'lock'
+  | 'fault'
+  | 'sensor'
 
 const cache = new Map<TokenName, string>()
 

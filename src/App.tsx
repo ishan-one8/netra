@@ -8,10 +8,10 @@ export default function App() {
   const { pathname } = useLocation()
 
   return (
-    <div className="flex min-h-screen flex-col bg-void-black">
+    <div className="flex min-h-screen flex-col bg-paper">
       <SiteNav />
       {/* Keyed so a route change fades rather than cuts. */}
-      <div key={pathname} className="netra-route-in flex-1">
+      <div key={pathname} className="route-in flex-1">
         <Routes>
           <Route path="/" element={<Marketing />} />
           <Route path="/simulator" element={<Simulator />} />

@@ -1,154 +1,158 @@
-/* NETRA, in the Sequel visual language.
-   Strictly achromatic: pure black, warm cream, three neutral greys. Every
-   colour, size, weight, space, radius and shadow in the product is declared
-   here — components carry no raw values. */
+/* NETRA — light instrument theme.
+   The page is paper. Type and hairlines carry the structure, one laser accent
+   carries every live signal, and the sensor frame is the only dark surface. */
 
 @theme {
   /* ---- Colour ------------------------------------------------------------
-     The default palette is removed on purpose. The system is 0% colorfulness
-     by design, so no utility exists for a chromatic value. */
+     Tailwind's default palette is removed so no off-system colour has a
+     utility to hide behind. */
   --color-*: initial;
   --color-transparent: transparent;
   --color-current: currentColor;
 
-  --color-void-black: #000000;
-  --color-pure-white: #ffffff;
-  --color-charcoal: #202020;
-  --color-graphite: #333333;
-  --color-lamp-cream: #f5f5f0;
-  --color-smoke: #999999;
+  --color-paper: #faf9f7;        /* page ground — warm, never grey */
+  --color-surface: #ffffff;      /* cards and raised panels */
+  --color-ink: #0a0a0b;          /* headings, primary text */
+  --color-ink-muted: #6b6b72;    /* body, secondary text */
+  --color-ink-faint: #a0a0a8;    /* captions, axis labels, disabled */
+  --color-rule: #e6e4de;         /* the only divider */
+  --color-rule-strong: #d3d0c8;  /* input tracks, chart baseline */
 
-  /* Glass is a surface treatment, not a palette entry. */
-  --color-glass: rgba(200, 200, 200, 0.1);
-  --color-glass-edge: rgba(255, 255, 255, 0.08);
+  --color-beam: #ff4a1c;         /* the laser. One accent, used sparingly */
+  --color-beam-wash: #fff1ec;    /* the accent at 6% — chips and highlights */
 
-  /* ---- Type faces --------------------------------------------------------
-     Satoshi stands in for VisueltPro; Instrument Serif for Bradford. */
-  --font-visuelt: 'Satoshi', 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
-  --font-visuelt--font-feature-settings: 'ss01' on, 'cv11' on;
-  --font-bradford: 'Instrument Serif', 'Canela', Georgia, serif;
+  --color-lock: #067647;         /* LOCKED only */
+  --color-fault: #b42318;        /* TRACK LOST and errors only */
+
+  --color-sensor: #08080a;       /* the camera frame — the one dark surface */
+
+  /* ---- Type faces -------------------------------------------------------- */
+  --font-sans: 'Satoshi', 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-sans--font-feature-settings: 'ss01' on, 'cv11' on;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', monospace;
+  --font-mono--font-feature-settings: 'tnum' 1;
 
   /* ---- Type scale -------------------------------------------------------- */
   --text-*: initial;
 
-  --text-caption: 10px;
-  --text-caption--line-height: 1.5;
-  --text-caption--letter-spacing: 0.08em;
-
-  --text-label-sm: 11px;
-  --text-label-sm--line-height: 1.5;
-  --text-label-sm--letter-spacing: 0.05em;
-
   --text-label: 12px;
-  --text-label--line-height: 1.5;
-  --text-label--letter-spacing: 0.05em;
+  --text-label--line-height: 1.4;
+  --text-label--letter-spacing: 0.08em;
 
-  --text-small: 13px;
+  --text-caption: 13px;
+  --text-caption--line-height: 1.5;
+
+  --text-small: 14px;
   --text-small--line-height: 1.5;
-  --text-small--letter-spacing: 0.03em;
-
-  --text-meta: 14px;
-  --text-meta--line-height: 1.5;
-
-  --text-nav: 15px;
-  --text-nav--line-height: 1.5;
 
   --text-body: 16px;
-  --text-body--line-height: 1.5;
+  --text-body--line-height: 1.6;
 
-  --text-body-md: 18px;
-  --text-body-md--line-height: 1.5;
+  --text-body-lg: 19px;
+  --text-body-lg--line-height: 1.6;
 
-  --text-body-lg: 20px;
-  --text-body-lg--line-height: 1.5;
+  --text-title: 24px;
+  --text-title--line-height: 1.3;
+  --text-title--letter-spacing: -0.015em;
 
-  --text-card: 21px;
-  --text-card--line-height: 1.3;
+  --text-heading-sm: 32px;
+  --text-heading-sm--line-height: 1.2;
+  --text-heading-sm--letter-spacing: -0.02em;
 
-  --text-subheading: 30px;
-  --text-subheading--line-height: 1.2;
-  --text-subheading--letter-spacing: -0.025em;
+  --text-heading: 44px;
+  --text-heading--line-height: 1.12;
+  --text-heading--letter-spacing: -0.028em;
 
-  --text-serif-sm: 32px;
-  --text-serif-sm--line-height: 1.2;
-  --text-serif-sm--letter-spacing: -0.025em;
+  --text-heading-lg: 64px;
+  --text-heading-lg--line-height: 1.05;
+  --text-heading-lg--letter-spacing: -0.034em;
 
-  /* The table gives 54px no tracking; -0.05em starts at 57px. */
-  --text-heading: 54px;
-  --text-heading--line-height: 1.2;
-
-  --text-heading-lg: 57px;
-  --text-heading-lg--line-height: 1;
-  --text-heading-lg--letter-spacing: -2.85px;
-
-  --text-display-sm: 115px;
-  --text-display-sm--line-height: 1;
-  --text-display-sm--letter-spacing: -0.025em;
-
-  --text-display: 128px;
+  --text-display: 88px;
   --text-display--line-height: 1;
-  --text-display--letter-spacing: -3.2px;
+  --text-display--letter-spacing: -0.04em;
 
-  /* ---- Weight ------------------------------------------------------------
-     Three weights. Nothing above 500, nothing below 300. */
+  /* Mono — every measured value in the product */
+  --text-readout-lg: 48px;
+  --text-readout-lg--line-height: 1;
+  --text-readout-lg--letter-spacing: -0.03em;
+
+  --text-readout: 32px;
+  --text-readout--line-height: 1;
+  --text-readout--letter-spacing: -0.02em;
+
+  --text-telemetry: 15px;
+  --text-telemetry--line-height: 1.4;
+
+  --text-log: 13px;
+  --text-log--line-height: 1.7;
+
+  --text-hud: 11px;
+  --text-hud--line-height: 1.4;
+
+  /* ---- Weight ------------------------------------------------------------ */
   --font-weight-*: initial;
-  --font-weight-light: 300;
   --font-weight-regular: 400;
   --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
 
   /* ---- Tracking ---------------------------------------------------------- */
   --tracking-*: initial;
-  --tracking-caption: 0.08em;
-  --tracking-label: 0.05em;
-  --tracking-small: 0.03em;
-  --tracking-subheading: -0.025em;
-  --tracking-display: -0.05em;
+  --tracking-label: 0.08em;
+  --tracking-tight: -0.02em;
+  --tracking-display: -0.04em;
 
   /* ---- Space -------------------------------------------------------------
-     Base unit 4px. The fluid default scale is disabled so intermediate values
+     Base unit 4px. The fluid default scale is off so intermediate values
      cannot be invented. */
   --spacing: initial;
   --spacing-0: 0px;
   --spacing-px: 1px;
+  --spacing-2: 2px;
   --spacing-4: 4px;
   --spacing-8: 8px;
   --spacing-12: 12px;
   --spacing-16: 16px;
   --spacing-20: 20px;
   --spacing-24: 24px;
-  --spacing-28: 28px;
   --spacing-32: 32px;
   --spacing-40: 40px;
+  --spacing-48: 48px;
   --spacing-64: 64px;
   --spacing-80: 80px;
   --spacing-96: 96px;
   --spacing-120: 120px;
+  --spacing-160: 160px;
 
-  /* ---- Shape -------------------------------------------------------------
-     Pills for buttons, badges and chips. 10px for cards and image containers.
-     0px for inputs. Nothing else. */
+  /* ---- Shape ------------------------------------------------------------- */
   --radius-*: initial;
   --radius-none: 0px;
-  --radius-card: 10px;
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
   --radius-full: 9999px;
 
   /* ---- Elevation ---------------------------------------------------------
-     Two shadows exist, both functional: the cream button lifting off the void,
-     and the rim-lit edge that makes a glass badge read as glass. Nothing else
-     in the system casts one. */
+     Light themes die from heavy shadows. These are almost imperceptible on
+     purpose — depth comes from the hairline, not the drop. */
   --shadow-*: initial;
   --inset-shadow-*: initial;
   --drop-shadow-*: initial;
   --text-shadow-*: initial;
 
-  --shadow-lg: rgba(0, 0, 0, 0.15) 0px 4px 20px 0px;
-  --shadow-xl: rgba(0, 0, 0, 0.35) 0px 10px 30px 0px,
-    rgba(255, 255, 255, 0.08) 0px 1px 0px 0px inset;
+  --shadow-xs: 0 1px 2px rgba(10, 10, 11, 0.04);
+  --shadow-sm: 0 1px 3px rgba(10, 10, 11, 0.05), 0 1px 2px rgba(10, 10, 11, 0.03);
+  --shadow-md: 0 4px 16px rgba(10, 10, 11, 0.06), 0 1px 2px rgba(10, 10, 11, 0.04);
+  --shadow-lg: 0 16px 48px rgba(10, 10, 11, 0.08), 0 2px 8px rgba(10, 10, 11, 0.04);
+  --shadow-beam: 0 4px 16px rgba(255, 74, 28, 0.24);
 
   /* ---- Layout ------------------------------------------------------------ */
   --container-page: 1200px;
+  --container-wide: 1360px;
 
-  /* ---- Motion ------------------------------------------------------------
-     A slow-out curve. Weighted, not snappy — a slow zoom on a film still. */
-  --ease-sequel: cubic-bezier(0.625, 0.05, 0, 1);
+  /* ---- Motion ------------------------------------------------------------ */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
 }

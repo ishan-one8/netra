@@ -9,12 +9,13 @@ type Props = {
   step?: number
   unit?: string
   decimals?: number
+  /** One line explaining what the parameter actually does. */
+  hint?: string
   disabled?: boolean
   onChange: (value: number) => void
   className?: string
 }
 
-/** Label left, live value right, a graphite track with a cream fill beneath. */
 export function ControlRow({
   label,
   value,
@@ -23,6 +24,7 @@ export function ControlRow({
   step = 1,
   unit,
   decimals = 0,
+  hint,
   disabled = false,
   onChange,
   className,
@@ -33,12 +35,12 @@ export function ControlRow({
   return (
     <div className={cx('flex flex-col', className)}>
       <div className="flex items-baseline justify-between gap-16">
-        <label htmlFor={id} className="text-body text-smoke">
+        <label htmlFor={id} className="text-small font-medium text-ink">
           {label}
         </label>
-        <span className="tabular text-body text-pure-white">
+        <span className="font-mono text-telemetry text-ink">
           {value.toFixed(decimals)}
-          {unit ? <span className="text-smoke">{unit}</span> : null}
+          {unit ? <span className="text-ink-faint">{unit}</span> : null}
         </span>
       </div>
       <input
@@ -53,6 +55,7 @@ export function ControlRow({
         onChange={(event) => onChange(Number(event.target.value))}
         style={{ '--fill': `${fill}%` } as React.CSSProperties}
       />
+      {hint ? <p className="-mt-4 text-caption text-ink-faint">{hint}</p> : null}
     </div>
   )
 }

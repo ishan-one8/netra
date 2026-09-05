@@ -8,17 +8,13 @@ type Props = {
   className?: string
 }
 
-/**
- * Content rises into place once, on first sight. Opacity and 14px of travel —
- * no scale, no blur, nothing that reads as decoration.
- */
 export function Reveal({ children, delay = 0, className }: Props) {
   const { ref, inView } = useInView<HTMLDivElement>()
 
   return (
     <div
       ref={ref}
-      className={cx('netra-reveal', inView && 'is-in', className)}
+      className={cx('reveal', inView && 'is-in', className)}
       style={delay ? { transitionDelay: `${delay}ms` } : undefined}
     >
       {children}

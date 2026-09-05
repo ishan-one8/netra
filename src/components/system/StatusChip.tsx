@@ -1,5 +1,4 @@
 import type { TrackState } from '../../sim/types'
-import { GlassBadge } from './GlassBadge'
 import { cx } from '../../lib/cx'
 
 const LABEL: Record<TrackState, string> = {
@@ -9,24 +8,52 @@ const LABEL: Record<TrackState, string> = {
   TRACK_LOST: 'Track lost',
 }
 
-/**
- * The system carries no chromatic colour, so state is told by tone and form
- * rather than hue: cream reads as lamplight on a live link, white as a held
- * candidate, smoke as still looking, and a hollow ring as nothing there.
- */
-const DOT: Record<TrackState, 'cream' | 'white' | 'smoke' | 'hollow'> = {
-  SEARCHING: 'smoke',
-  ACQUIRED: 'white',
-  LOCKED: 'cream',
-  TRACK_LOST: 'hollow',
+const TONE: Record<TrackState, { dot: string; text: string; wash: string; pulse: boolean }> = {
+  SEARCHING: {
+    dot: 'bg-beam',
+    text: 'text-beam',
+    wash: 'bg-beam-wash border-transparent',
+    pulse: true,
+  },
+  ACQUIRED: {
+    dot: 'bg-ink',
+    text: 'text-ink',
+    wash: 'bg-surface border-rule',
+    pulse: false,
+  },
+  LOCKED: {
+    dot: 'bg-lock',
+    text: 'text-lock',
+    wash: 'bg-surface border-rule',
+    pulse: false,
+  },
+  TRACK_LOST: {
+    dot: 'bg-fault',
+    text: 'text-fault',
+    wash: 'bg-surface border-rule',
+    pulse: false,
+  },
 }
 
 export function StatusChip({ state, className }: { state: TrackState; className?: string }) {
+  const tone = TONE[state]
   return (
-    <span role="status" aria-live="polite" className={cx('inline-flex', className)}>
-      <GlassBadge dot={DOT[state]} className={state === 'SEARCHING' ? 'netra-pulse' : undefined}>
-        {LABEL[state]}
-      </GlassBadge>
+    <span
+      role="status"
+      aria-live="polite"
+      className={cx(
+        'inline-flex items-center gap-8 rounded-full border px-12 py-4',
+        'text-label font-medium uppercase tracking-label shadow-xs',
+        tone.wash,
+        tone.text,
+        className,
+      )}
+    >
+      <span
+        aria-hidden
+        className={cx('size-[7px] rounded-full', tone.dot, tone.pulse && 'pulse-dot')}
+      />
+      {LABEL[state]}
     </span>
   )
 }
