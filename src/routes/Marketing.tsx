@@ -19,6 +19,7 @@ import {
   Spotlight,
 } from '../components/system'
 import { useInView } from '../lib/useInView'
+import { cx } from '../lib/cx'
 
 const SPEC_STRIP = [
   'Gigabit-to-terabit data rates',
@@ -73,9 +74,19 @@ const PIPELINE = [
 function PipelineItem({ node }: { node: (typeof PIPELINE)[number] }) {
   const { ref, inView } = useInView<HTMLDivElement>({ threshold: 0.4 })
   return (
-    <div ref={ref} className="flex flex-col gap-20">
-      <Hairline draw />
+    <div ref={ref} className="relative">
       <PipelineNode index={node.index} name={node.name} detail={node.detail} lit={inView} />
+    </div>
+  )
+}
+
+/** The rail the stages sit on, drawing itself once the row is in view. */
+function PipelineRow({ children }: { children: React.ReactNode }) {
+  const { ref, inView } = useInView<HTMLDivElement>({ threshold: 0.25 })
+  return (
+    <div ref={ref} className="relative">
+      <span aria-hidden className={cx('flow-line hidden lg:block', inView && 'is-in')} />
+      <div className="relative grid gap-32 lg:grid-cols-5 lg:gap-20">{children}</div>
     </div>
   )
 }
@@ -151,7 +162,7 @@ export function Marketing() {
       </div>
 
       {/* ---- Problem ------------------------------------------------------- */}
-      <Section id="problem" label="The problem">
+      <Section id="problem" label="The problem" glow="left">
         <div className="flex flex-col gap-32 lg:flex-row lg:items-end lg:justify-between">
           <Heading
             size="lg"
@@ -169,11 +180,11 @@ export function Marketing() {
         </div>
 
         <Reveal delay={80}>
-          <Card className="overflow-hidden">
-            <div className="h-[220px] w-full sm:h-[280px]">
+          <Card variant="glass" className="overflow-hidden">
+            <div className="h-[220px] w-full sm:h-[300px]">
               <LinkField verticalCenter={0.5} />
             </div>
-            <div className="flex flex-wrap items-center justify-between gap-12 border-t border-rule px-20 py-16">
+            <div className="flex flex-wrap items-center justify-between gap-12 border-t border-glass-edge px-20 py-16">
               <p className="text-small text-ink-muted">
                 Two terminals, one link. It holds, breaks under occlusion, and has to be
                 reacquired — the cycle coarse alignment exists to survive.
@@ -186,7 +197,10 @@ export function Marketing() {
         <div className="grid gap-16 md:grid-cols-3">
           {PROBLEM.map((item, i) => (
             <Reveal key={item.title} delay={i * 100}>
-              <Card interactive className="flex h-full flex-col gap-12 p-24">
+              <Card variant="glass" interactive className="flex h-full flex-col gap-16 p-24">
+                <span className="font-mono text-hud font-medium text-beam">
+                  {String(i + 1).padStart(2, '0')}
+                </span>
                 <h3 className="text-title font-medium text-ink">{item.title}</h3>
                 <p className="text-small text-ink-muted">{item.body}</p>
               </Card>
@@ -196,7 +210,7 @@ export function Marketing() {
       </Section>
 
       {/* ---- System -------------------------------------------------------- */}
-      <Section id="system" label="The system" surface="surface">
+      <Section id="system" label="The system" glow="right">
         <Heading
           size="lg"
           text="Three parts, one closed loop."
@@ -207,8 +221,8 @@ export function Marketing() {
         <div className="grid gap-16 lg:grid-cols-3">
           {SYSTEM.map((item, i) => (
             <Reveal key={item.title} delay={i * 100}>
-              <div className="card-interactive flex h-full flex-col gap-16 rounded-lg border border-transparent bg-paper p-24">
-                <Badge>{item.badge}</Badge>
+              <div className="glass-card glass-card-hover flex h-full flex-col gap-16 rounded-lg p-24">
+                <Badge tone="beam">{item.badge}</Badge>
                 <h3 className="text-title font-medium text-ink">{item.title}</h3>
                 <p className="text-small text-ink-muted">{item.body}</p>
               </div>
@@ -217,7 +231,7 @@ export function Marketing() {
         </div>
 
         <Reveal delay={240}>
-          <div className="flex flex-col gap-16 rounded-lg border border-rule bg-paper p-24 sm:flex-row sm:items-center sm:justify-between sm:p-32">
+          <div className="glass-card flex flex-col gap-16 rounded-lg p-24 sm:flex-row sm:items-center sm:justify-between sm:p-32">
             <div className="flex flex-col gap-4">
               <Label tone="beam">Why it can be trained at all</Label>
               <p className="max-w-[62ch] text-small text-ink-muted">
@@ -234,22 +248,22 @@ export function Marketing() {
       </Section>
 
       {/* ---- Pipeline ------------------------------------------------------ */}
-      <Section id="pipeline" label="Tracking pipeline">
+      <Section id="pipeline" label="Tracking pipeline" glow="right">
         <Heading
           size="lg"
           text="Five stages, one frame at a time."
           accent="frame"
           className="max-w-[20ch]"
         />
-        <div className="grid gap-32 lg:grid-cols-5 lg:gap-20">
+        <PipelineRow>
           {PIPELINE.map((node) => (
             <PipelineItem key={node.index} node={node} />
           ))}
-        </div>
+        </PipelineRow>
       </Section>
 
       {/* ---- Evidence ------------------------------------------------------ */}
-      <Section id="evidence" label="Evidence" surface="surface">
+      <Section id="evidence" label="Evidence" surface="surface" glow="left">
         <div className="flex flex-col gap-32 lg:flex-row lg:items-end lg:justify-between">
           <Heading
             size="lg"
@@ -273,9 +287,9 @@ export function Marketing() {
             ['Lock retention', '≥ 60%', 'share of the whole phase spent locked'],
           ].map(([label, value, note], i) => (
             <Reveal key={label} delay={i * 100}>
-              <div className="card-interactive flex h-full flex-col gap-8 rounded-lg border border-transparent bg-paper p-24">
+              <div className="glass-card glass-card-hover flex h-full flex-col gap-8 rounded-lg p-24">
                 <Label>{label}</Label>
-                <span className="font-mono text-heading-sm font-medium text-ink">{value}</span>
+                <span className="stat-gradient font-mono text-heading-sm font-medium">{value}</span>
                 <p className="text-caption text-ink-muted">{note}</p>
               </div>
             </Reveal>
@@ -293,7 +307,7 @@ export function Marketing() {
       </Section>
 
       {/* ---- Architecture --------------------------------------------------- */}
-      <Section id="architecture" label="System architecture">
+      <Section id="architecture" label="System architecture" glow="left">
         <div className="flex flex-col gap-32 lg:flex-row lg:items-end lg:justify-between">
           <Heading
             size="lg"
@@ -313,7 +327,7 @@ export function Marketing() {
       </Section>
 
       {/* ---- Technology ------------------------------------------------------ */}
-      <Section id="technology" label="Technology" surface="surface">
+      <Section id="technology" label="Technology" surface="surface" glow="right">
         <Heading
           size="lg"
           text="Mature parts, no exotic frameworks."
@@ -324,7 +338,7 @@ export function Marketing() {
       </Section>
 
       {/* ---- Applications ---------------------------------------------------- */}
-      <Section id="applications" label="Where it applies">
+      <Section id="applications" label="Where it applies" glow="left">
         <Heading
           size="lg"
           text="Anywhere a narrow beam has to follow a moving target."
@@ -342,7 +356,7 @@ export function Marketing() {
       </Section>
 
       {/* ---- Scope ------------------------------------------------------------ */}
-      <Section id="scope" label="Scope" surface="surface">
+      <Section id="scope" label="Scope" surface="surface" glow="right">
         <div className="grid gap-32 lg:grid-cols-2 lg:gap-64">
           <Heading
             size="md"
@@ -386,7 +400,7 @@ export function Marketing() {
       </Section>
 
       {/* ---- Team -------------------------------------------------------------- */}
-      <Section id="team" label="The team">
+      <Section id="team" label="The team" glow="left">
         <Heading
           size="lg"
           text="Six roles, one loop."
@@ -397,7 +411,7 @@ export function Marketing() {
       </Section>
 
       {/* ---- Close --------------------------------------------------------- */}
-      <Section label="Mission context" surface="surface">
+      <Section label="Mission context" surface="surface" glow="right">
         <div className="grid gap-40 lg:grid-cols-2 lg:gap-64">
           <div className="flex flex-col gap-24">
             <Heading
@@ -423,7 +437,7 @@ export function Marketing() {
           </div>
 
           <Reveal delay={160}>
-            <Card className="p-24 sm:p-32">
+            <Card variant="glass" className="p-24 sm:p-32">
               <dl className="flex flex-col gap-20">
                 {[
                   ['Problem statement ID', 'SIH26169'],

@@ -37,7 +37,7 @@ export function TechStack() {
   return (
     <div className="grid gap-12 sm:grid-cols-2 lg:grid-cols-3">
       {STACK.map((s) => (
-        <div key={s.name} className="card-interactive flex flex-col gap-8 rounded-md border border-rule bg-surface p-16">
+        <div key={s.name} className="glass-card glass-card-hover flex flex-col gap-8 rounded-md p-16">
           <Label tone="beam">{s.role}</Label>
           <h3 className="text-small font-medium text-ink">{s.name}</h3>
           <p className="text-caption text-ink-muted">{s.detail}</p>

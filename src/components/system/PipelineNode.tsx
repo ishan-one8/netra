@@ -14,9 +14,9 @@ export function PipelineNode({ index, name, detail, lit, className }: Props) {
       <span
         className={cx(
           'inline-flex size-[32px] items-center justify-center rounded-full border',
-          'font-mono text-hud font-medium transition-colors duration-500 ease-out',
+          'font-mono text-hud font-medium shadow-xs transition-all duration-500 ease-out',
           lit
-            ? 'border-beam bg-beam-wash text-beam'
+            ? 'border-beam bg-beam-wash text-beam scale-110'
             : 'border-rule bg-surface text-ink-faint',
         )}
       >

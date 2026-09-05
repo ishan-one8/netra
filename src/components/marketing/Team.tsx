@@ -17,9 +17,9 @@ export function Team() {
   return (
     <div className="grid gap-12 sm:grid-cols-2 lg:grid-cols-3">
       {TEAM.map((m) => (
-        <div key={m.code} className="card-interactive flex flex-col gap-8 rounded-md border border-rule bg-surface p-16">
+        <div key={m.code} className="glass-card glass-card-hover flex flex-col gap-8 rounded-md p-16">
           <div className="flex items-center gap-8">
-            <span className="inline-flex size-[28px] items-center justify-center rounded-full border border-rule font-mono text-hud text-ink-faint">
+            <span className="inline-flex size-[32px] items-center justify-center rounded-full border border-beam/30 bg-beam-wash font-mono text-hud font-medium text-beam">
               {m.code}
             </span>
             <Label>{m.role}</Label>

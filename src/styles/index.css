@@ -543,3 +543,144 @@
   );
   transition: opacity 400ms var(--ease-out);
 }
+
+/* ---- Section bloom --------------------------------------------------------
+   One soft field per section, far weaker than the hero's, so the page keeps
+   breathing as you scroll instead of going flat below the fold. */
+.section-glow {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.section-glow span {
+  position: absolute;
+  width: 60vw;
+  height: 34vw;
+  border-radius: var(--radius-full);
+  filter: blur(110px);
+  opacity: 0.22;
+  will-change: transform;
+}
+
+.section-glow-left span {
+  left: -14vw;
+  top: -8vw;
+  background: var(--color-aurora-beam);
+  animation: aurora-drift-3 32s ease-in-out infinite alternate;
+}
+
+.section-glow-right span {
+  right: -14vw;
+  bottom: -10vw;
+  background: var(--color-aurora-deep);
+  animation: aurora-drift-2 38s ease-in-out infinite alternate;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .section-glow span {
+    animation: none;
+  }
+}
+
+/* ---- Glass card -----------------------------------------------------------
+   The card vocabulary for everything that sits over a bloom. It lifts, and its
+   edge catches the accent, but it never glows on its own. */
+.glass-card {
+  position: relative;
+  background: var(--color-glass);
+  backdrop-filter: blur(18px) saturate(1.5);
+  -webkit-backdrop-filter: blur(18px) saturate(1.5);
+  border: 1px solid var(--color-glass-edge);
+  box-shadow: var(--shadow-glass-sm);
+  transition:
+    transform 400ms var(--ease-out),
+    box-shadow 400ms var(--ease-out),
+    border-color 400ms var(--ease-out);
+}
+
+.glass-card-hover:hover {
+  transform: translateY(-3px);
+  border-color: rgba(255, 74, 28, 0.35);
+  box-shadow: var(--shadow-lg), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+/* A hairline of accent that draws itself along the top edge on hover. */
+.glass-card-hover::before {
+  content: '';
+  position: absolute;
+  inset-inline: 16px;
+  top: -1px;
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    transparent,
+    var(--color-aurora-beam),
+    transparent
+  );
+  opacity: 0;
+  transform: scaleX(0.4);
+  transition:
+    opacity 400ms var(--ease-out),
+    transform 400ms var(--ease-out);
+}
+
+.glass-card-hover:hover::before {
+  opacity: 1;
+  transform: scaleX(1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .glass-card-hover:hover {
+    transform: none;
+  }
+}
+
+/* ---- Numbers that carry weight -------------------------------------------- */
+@utility stat-gradient {
+  background-image: linear-gradient(
+    140deg,
+    var(--color-ink) 0%,
+    var(--color-aurora-beam) 70%,
+    var(--color-aurora-deep) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* ---- Flow connectors ------------------------------------------------------
+   The line between pipeline stages draws itself as the row comes into view. */
+.flow-line {
+  position: absolute;
+  top: 15px;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    var(--color-rule),
+    var(--color-aurora-beam),
+    var(--color-rule)
+  );
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 1400ms var(--ease-out);
+}
+
+.flow-line.is-in {
+  transform: scaleX(1);
+}
+
+/* ---- Marquee edges --------------------------------------------------------
+   The strip should fade out rather than be chopped by the viewport. */
+.marquee-mask {
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    black 8%,
+    black 92%,
+    transparent
+  );
+}

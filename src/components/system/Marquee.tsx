@@ -4,7 +4,7 @@ export function Marquee({ items, className }: { items: readonly string[]; classN
   const doubled = [...items, ...items]
 
   return (
-    <div className={cx('w-full overflow-x-clip', className)} aria-hidden>
+    <div className={cx('marquee-mask w-full overflow-x-clip', className)} aria-hidden>
       <div className="marquee-track">
         {doubled.map((item, i) => (
           <span

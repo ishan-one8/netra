@@ -15,6 +15,7 @@ import {
   Label,
   SegmentedControl,
   StatusChip,
+  SectionGlow,
 } from '../components/system'
 import { useTracker, type SimParams, type TrackerMode } from '../sim/useTracker'
 import { useStressTest, type Sample } from '../sim/useStressTest'
@@ -92,12 +93,16 @@ export function Simulator() {
   const patternDetail = MOTION_PATTERNS.find((p) => p.value === params.pattern)?.detail ?? ''
 
   return (
-    <main className="page-wide flex flex-col gap-24 py-24 lg:py-32">
+    <main className="relative">
+      <SectionGlow side="right" />
+      <div className="page-wide relative flex flex-col gap-24 py-24 lg:py-32">
       {/* ---- Header ------------------------------------------------------- */}
       <header className="flex flex-wrap items-end justify-between gap-16">
         <div className="flex flex-col gap-4">
           <Label tone="beam">Coarse alignment · virtual camera</Label>
-          <h1 className="text-heading-sm font-medium tracking-tight text-ink">Mission console</h1>
+          <h1 className="text-heading-sm font-medium tracking-tight text-ink">
+            Mission <span className="text-gradient">console</span>
+          </h1>
         </div>
         <div className="flex flex-wrap items-center gap-12">
           <StatusChip state={state} />
@@ -108,7 +113,7 @@ export function Simulator() {
         </div>
       </header>
 
-      <Card className="flex flex-wrap items-center gap-12 px-16 py-12">
+      <Card variant="glass" className="flex flex-wrap items-center gap-12 px-16 py-12">
         <Badge tone="beam">Simulation</Badge>
         <p className="text-caption text-ink-muted">
           Every value on this page is produced by the simulation — a virtual camera, a virtual
@@ -119,7 +124,7 @@ export function Simulator() {
       <div className="grid gap-20 xl:grid-cols-[320px_minmax(0,1fr)_320px]">
         {/* ---- Controls --------------------------------------------------- */}
         <aside className="flex flex-col gap-16">
-          <Card className="flex flex-col gap-20 p-20">
+          <Card variant="glass" className="flex flex-col gap-20 p-20">
             <div className="flex flex-col gap-8">
               <Label>Target motion</Label>
               <SegmentedControl
@@ -242,7 +247,7 @@ export function Simulator() {
 
         {/* ---- Viewport and metrics --------------------------------------- */}
         <section className="flex flex-col gap-20">
-          <Card className="p-12 sm:p-16">
+          <Card variant="glass" className="p-12 sm:p-16">
             <div className="flex flex-wrap items-center justify-between gap-12 px-4 pb-12">
               <span className="font-mono text-hud uppercase tracking-label text-ink-faint">
                 Pan {telemetry.pan.toFixed(2)}° · Tilt {telemetry.tilt.toFixed(2)}°
@@ -259,18 +264,18 @@ export function Simulator() {
             />
           </Card>
 
-          <Card className="p-20">
+          <Card variant="glass" className="p-20">
             <MetricGrid telemetry={telemetry} />
           </Card>
 
-          <Card className="p-20">
+          <Card variant="glass" className="p-20">
             <RecoverySequence recovery={recovery} />
           </Card>
         </section>
 
         {/* ---- Log --------------------------------------------------------- */}
         <section>
-          <Card className="flex flex-col gap-16 p-20">
+          <Card variant="glass" className="flex flex-col gap-16 p-20">
             <Label>Event log</Label>
             <EventLog entries={log} />
           </Card>
@@ -278,7 +283,7 @@ export function Simulator() {
       </div>
 
       {/* ---- Performance --------------------------------------------------- */}
-      <Card className="flex flex-col gap-24 p-20 sm:p-24">
+      <Card variant="glass" className="flex flex-col gap-24 p-20 sm:p-24">
         <div className="flex flex-wrap items-end justify-between gap-12">
           <div className="flex flex-col gap-4">
             <Label tone="beam">Performance</Label>
@@ -296,7 +301,7 @@ export function Simulator() {
       </Card>
 
       {/* ---- Stress test ---------------------------------------------------- */}
-      <Card className="p-20 sm:p-24">
+      <Card variant="glass" className="p-20 sm:p-24">
         <StressTestPanel
           running={stress.running}
           phaseIndex={stress.phaseIndex}
@@ -307,6 +312,7 @@ export function Simulator() {
           onCancel={stress.cancel}
         />
       </Card>
+      </div>
     </main>
   )
 }
