@@ -1,0 +1,137 @@
+/* NETRA — theme layer.
+   Every colour, size, weight, space and radius in the product is declared here.
+   Components consume these as Tailwind utilities; no component carries a raw value. */
+
+@theme {
+  /* ---- Colour ------------------------------------------------------------
+     The default Tailwind palette is removed on purpose: if a colour is not in
+     the design system, no utility exists for it. */
+  --color-*: initial;
+  --color-transparent: transparent;
+  --color-current: currentColor;
+
+  --color-void: #000000;
+  --color-bone: #ffffff;
+  --color-ash: #9a9a9a;
+  --color-silver: #bdbdbd;
+  --color-beam: #6c4bff;
+  --color-signal: #ffb829;
+  --color-lock: #3ddc97;
+  --color-fault: #ff4d4d;
+  --color-aqua: #0e7c86;
+  --color-hairline: rgba(255, 255, 255, 0.08);
+  --color-viewport-edge: rgba(255, 255, 255, 0.14);
+
+  /* ---- Type faces -------------------------------------------------------- */
+  --font-display: 'Switzer', 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+  --font-mono--font-feature-settings: 'tnum' 1;
+
+  /* ---- Type scale --------------------------------------------------------
+     Sizes, line-heights and tracking travel together so a role cannot be
+     half-applied. */
+  --text-*: initial;
+
+  --text-caption: 12px;
+  --text-caption--line-height: 1.5;
+
+  --text-label: 14px;
+  --text-label--line-height: 1.2;
+  --text-label--letter-spacing: 0.35px;
+
+  --text-body: 18px;
+  --text-body--line-height: 1.5;
+
+  --text-heading-2xs: 24px;
+  --text-heading-2xs--line-height: 1.25;
+  --text-heading-2xs--letter-spacing: -0.48px;
+
+  --text-heading-xs: 27px;
+  --text-heading-xs--line-height: 1;
+
+  --text-subheading: 36px;
+  --text-subheading--line-height: 1.2;
+
+  --text-heading-sm: 42px;
+  --text-heading-sm--line-height: 1.2;
+  --text-heading-sm--letter-spacing: -1.68px;
+
+  --text-heading: 48px;
+  --text-heading--line-height: 1.1;
+  --text-heading--letter-spacing: -1.68px;
+
+  --text-heading-lg: 78px;
+  --text-heading-lg--line-height: 1.1;
+  --text-heading-lg--letter-spacing: -3.12px;
+
+  --text-display: 113px;
+  --text-display--line-height: 1.1;
+  --text-display--letter-spacing: -4.52px;
+
+  --text-readout-xl: 56px;
+  --text-readout-xl--line-height: 1;
+  --text-readout-xl--letter-spacing: -0.02em;
+
+  --text-readout: 32px;
+  --text-readout--line-height: 1;
+
+  --text-telemetry: 15px;
+  --text-telemetry--line-height: 1.4;
+
+  --text-log: 13px;
+  --text-log--line-height: 1.6;
+
+  --text-hud: 11px;
+  --text-hud--line-height: 1.4;
+
+  /* ---- Weight ------------------------------------------------------------
+     Three weights exist. Bold does not. */
+  --font-weight-*: initial;
+  --font-weight-extralight: 200;
+  --font-weight-regular: 400;
+  --font-weight-medium: 500; /* mono only — the primary lock readout */
+  --font-weight-semibold: 600;
+
+  /* ---- Tracking ---------------------------------------------------------- */
+  --tracking-*: initial;
+  --tracking-display: -0.04em;
+  --tracking-label: 0.025em;
+  --tracking-eyebrow: 0.14em;
+
+  /* ---- Space -------------------------------------------------------------
+     Base unit 6px. The fluid default scale is disabled so intermediate values
+     cannot be invented. */
+  --spacing: initial;
+  --spacing-0: 0px;
+  --spacing-px: 1px;
+  --spacing-6: 6px;
+  --spacing-12: 12px;
+  --spacing-18: 18px;
+  --spacing-24: 24px;
+  --spacing-30: 30px;
+  --spacing-36: 36px;
+  --spacing-60: 60px;
+  --spacing-96: 96px;
+  --spacing-120: 120px;
+
+  /* ---- Shape -------------------------------------------------------------
+     24px for buttons, viewport and grouped regions. Pills for tags. Zero for
+     rules and chart elements. */
+  --radius-*: initial;
+  --radius-none: 0px;
+  --radius-lg: 24px;
+  --radius-full: 9999px;
+
+  /* ---- Elevation ---------------------------------------------------------
+     None. Removing the tokens removes the utilities. */
+  --shadow-*: initial;
+  --inset-shadow-*: initial;
+  --drop-shadow-*: initial;
+  --text-shadow-*: initial;
+
+  /* ---- Layout ------------------------------------------------------------ */
+  --container-page: 1280px;
+
+  /* ---- Motion ------------------------------------------------------------ */
+  --ease-signal: cubic-bezier(0.22, 1, 0.36, 1);
+}
