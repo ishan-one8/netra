@@ -8,20 +8,23 @@ import { useTracker } from '../../sim/useTracker'
  */
 export function LivePanel() {
   const { state, telemetry, snapshotRef } = useTracker({
-    turbulence: 42,
-    jitter: 28,
-    gain: 64,
-    sweep: 72,
+    pattern: 'orbital',
+    speed: 1,
+    turbulence: 30,
+    vibration: 18,
+    noise: 15,
+    brightness: 88,
+    decoys: true,
+    dropouts: true,
     mode: 'kalman',
-    scene: 'leo',
     running: true,
   })
 
   const readouts = [
-    { label: 'Azimuth', value: telemetry.azimuth.toFixed(2), unit: '°' },
-    { label: 'Elevation', value: telemetry.elevation.toFixed(2), unit: '°' },
-    { label: 'Residual', value: telemetry.rmsError.toFixed(1), unit: 'µrad' },
-    { label: 'Confidence', value: telemetry.confidence.toFixed(0), unit: '%' },
+    { label: 'Pan', value: telemetry.pan.toFixed(2), unit: '°' },
+    { label: 'Tilt', value: telemetry.tilt.toFixed(2), unit: '°' },
+    { label: 'Pointing error', value: telemetry.errorMrad.toFixed(1), unit: 'mrad' },
+    { label: 'Lock retention', value: telemetry.lockRetention.toFixed(0), unit: '%' },
   ]
 
   return (
@@ -29,7 +32,7 @@ export function LivePanel() {
       <div className="flex flex-wrap items-center justify-between gap-12 px-4 pb-12">
         <StatusChip state={state} />
         <span className="font-mono text-hud uppercase tracking-label text-ink-faint">
-          LEO pass · Kalman estimator · live
+          LEO pass · Kalman · decoys and dropouts on
         </span>
       </div>
 

@@ -9,6 +9,13 @@ export default function App() {
 
   return (
     <div className="flex min-h-screen flex-col bg-paper">
+      {/* Said once, at the top, before anything is claimed. */}
+      <div className="w-full border-b border-rule bg-ink">
+        <p className="page-wide py-8 text-center font-mono text-hud uppercase tracking-label text-surface/70">
+          Software simulation · virtual camera and virtual beacon · no optical hardware involved
+        </p>
+      </div>
+
       <SiteNav />
       {/* Keyed so a route change fades rather than cuts. */}
       <div key={pathname} className="route-in flex-1">

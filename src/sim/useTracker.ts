@@ -1,72 +1,115 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { LogEntry, LogSeverity, Telemetry, TrackState } from './types'
+import {
+  ACQUIRE_DEG,
+  LOCK_DEG,
+  angularError,
+  degToMrad,
+  project,
+  slew,
+  DEG_PER_PX,
+} from './camera'
+import { bearingAt, initialMotionState, type MotionPattern, type MotionState } from './motion'
 
 export type TrackerMode = 'centroid' | 'kalman' | 'correlation'
-export type Scene = 'leo' | 'geo' | 'ground'
 
 export type SimParams = {
-  turbulence: number // 0–100, Cn² proxy
-  jitter: number // 0–100, platform vibration
-  gain: number // 0–100, detector gain
-  sweep: number // 0–100, search sweep rate
+  pattern: MotionPattern
+  /** Target speed multiplier, 0.25–3. */
+  speed: number
+  /** 0–100. Scintillation and beam wander. */
+  turbulence: number
+  /** 0–100. Physical shake of the camera mount. */
+  vibration: number
+  /** 0–100. Sensor noise floor. */
+  noise: number
+  /** 0–100. Beacon source strength. */
+  brightness: number
+  /** Decoy light sources the detector must reject. */
+  decoys: boolean
+  /** Periodic occlusion of the beacon. */
+  dropouts: boolean
   mode: TrackerMode
-  scene: Scene
   running: boolean
 }
 
+export type Candidate = { x: number; y: number; score: number; decoy: boolean }
+
 export type SimSnapshot = {
-  /** Beacon truth, in normalised viewport space. */
-  truth: { x: number; y: number }
-  /** What the detector reports this frame. */
+  /** Where the beacon truly is, in frame coordinates. */
+  truth: { x: number; y: number; inFrame: boolean }
+  /** What the tracker believes. */
   detection: { x: number; y: number }
-  /** Kalman lead, drawn as the dashed ghost. */
   prediction: { x: number; y: number }
-  /** Recent detections, oldest first. */
+  /** Everything the detector proposed this frame, including decoys. */
+  candidates: Candidate[]
   trail: Array<{ x: number; y: number }>
   boxSize: number
   state: TrackState
   confidence: number
   occluded: boolean
+  /** True while the gimbal is running its search pattern. */
+  searching: boolean
 }
 
 export type HistoryPoint = {
   t: number
-  error: number
-  confidence: number
+  errorMrad: number
+  targetAz: number
+  predictedAz: number
+  pan: number
+  locked: number
 }
 
-const TRAIL_LENGTH = 48
-const HISTORY_LENGTH = 60
-const PUBLISH_MS = 220
+const TRAIL_LENGTH = 56
+const HISTORY_LENGTH = 90
+const PUBLISH_MS = 200
 
-const SCENE_DRIFT: Record<Scene, { rate: number; span: number }> = {
-  leo: { rate: 0.00042, span: 0.3 },
-  geo: { rate: 0.00009, span: 0.06 },
-  ground: { rate: 0.00021, span: 0.16 },
+const MODE_QUALITY: Record<
+  TrackerMode,
+  { smoothing: number; lead: number; cost: number; reject: number }
+> = {
+  // reject: how well the associator resists latching onto a decoy.
+  centroid: { smoothing: 0.3, lead: 0.25, cost: 3.1, reject: 0.45 },
+  kalman: { smoothing: 0.1, lead: 1.5, cost: 6.4, reject: 0.82 },
+  correlation: { smoothing: 0.17, lead: 0.8, cost: 11.2, reject: 0.93 },
 }
 
-const MODE_QUALITY: Record<TrackerMode, { smoothing: number; lead: number; cost: number }> = {
-  centroid: { smoothing: 0.28, lead: 0.4, cost: 3.1 },
-  kalman: { smoothing: 0.09, lead: 1.6, cost: 6.4 },
-  correlation: { smoothing: 0.16, lead: 0.9, cost: 11.2 },
-}
-
-function clamp01(n: number) {
-  return Math.min(1, Math.max(0, n))
+function clamp(n: number, lo: number, hi: number) {
+  return Math.min(hi, Math.max(lo, n))
 }
 
 function formatClock(ms: number) {
   const total = Math.floor(ms / 1000)
-  const h = String(Math.floor(total / 3600)).padStart(2, '0')
-  const m = String(Math.floor((total % 3600) / 60)).padStart(2, '0')
+  const m = String(Math.floor(total / 60)).padStart(2, '0')
   const s = String(total % 60).padStart(2, '0')
-  return `${h}:${m}:${s}`
+  const cs = String(Math.floor((ms % 1000) / 10)).padStart(2, '0')
+  return `${m}:${s}.${cs}`
 }
 
+const emptyTelemetry = (): Telemetry => ({
+  pan: 0,
+  tilt: 42,
+  errorPx: 0,
+  errorMrad: 0,
+  peakErrorMrad: 0,
+  confidence: 0,
+  snr: 0,
+  frame: 0,
+  fps: 0,
+  processingMs: 0,
+  lockRetention: 0,
+  acquisitionS: 0,
+  reacquisitionS: 0,
+  candidates: 0,
+})
+
 /**
- * The tracking loop. Physics runs at frame rate against a ref so the viewport
- * can draw without re-rendering React; telemetry, log and chart series publish
- * a few times a second, plus immediately on any state change.
+ * The closed coarse-alignment loop.
+ *
+ * Physics and control run at frame rate against a ref, so the viewport can
+ * draw without re-rendering React; telemetry, log and chart series publish a
+ * few times a second, and immediately on any state change.
  */
 export function useTracker(params: SimParams) {
   const paramsRef = useRef(params)
@@ -75,84 +118,128 @@ export function useTracker(params: SimParams) {
   })
 
   const snapshotRef = useRef<SimSnapshot>({
-    truth: { x: 0.5, y: 0.5 },
+    truth: { x: 0.5, y: 0.5, inFrame: true },
     detection: { x: 0.5, y: 0.5 },
     prediction: { x: 0.5, y: 0.5 },
+    candidates: [],
     trail: [],
-    boxSize: 0.12,
+    boxSize: 0.1,
     state: 'SEARCHING',
     confidence: 0,
     occluded: false,
+    searching: true,
   })
 
   const [state, setState] = useState<TrackState>('SEARCHING')
-  const [telemetry, setTelemetry] = useState<Telemetry>({
-    azimuth: 0,
-    elevation: 0,
-    range: 0,
-    confidence: 0,
-    latency: 0,
-    frame: 0,
-    rmsError: 0,
-    snr: 0,
-  })
+  const [telemetry, setTelemetry] = useState<Telemetry>(emptyTelemetry)
   const [log, setLog] = useState<LogEntry[]>([])
   const [history, setHistory] = useState<HistoryPoint[]>([])
 
-  const logIdRef = useRef(0)
-  const elapsedRef = useRef(0)
-  const frameRef = useRef(0)
-  const lastPublishRef = useRef(0)
+  // ---- mutable simulation state -------------------------------------------
+  const logId = useRef(0)
+  const elapsed = useRef(0)
+  const frames = useRef(0)
+  const lastPublish = useRef(0)
   const stateRef = useRef<TrackState>('SEARCHING')
-  const lockTimerRef = useRef(0)
-  const occlusionRef = useRef({ active: false, until: 0, next: 6200 })
-  const smoothedRef = useRef({ x: 0.5, y: 0.5 })
-  const velocityRef = useRef({ x: 0, y: 0 })
-  const errorRef = useRef(1)
+  const motion = useRef<MotionState>(initialMotionState())
+  const gimbal = useRef({ pan: 0, tilt: 42 })
+  const estimate = useRef({ az: 0, el: 42, vAz: 0, vEl: 0, valid: false })
+  const decoys = useRef<Array<{ az: number; el: number; drift: number; bright: number }>>([])
+  const occlusion = useRef({ active: false, until: 0, next: 9000 })
+  const lockTimer = useRef(0)
+  const lostTimer = useRef(0)
+  const searchPhase = useRef(0)
+  const metrics = useRef({
+    lockedMs: 0,
+    runMs: 0,
+    peakMrad: 0,
+    acquisitionS: 0,
+    reacquisitionS: 0,
+    lostAt: 0,
+    fpsEma: 60,
+  })
 
   const push = useCallback((severity: LogSeverity, message: string) => {
     setLog((prev) => {
-      const entry: LogEntry = {
-        id: logIdRef.current++,
-        t: formatClock(elapsedRef.current),
-        severity,
-        message,
-      }
+      const entry: LogEntry = { id: logId.current++, t: formatClock(elapsed.current), severity, message }
       const next = [...prev, entry]
-      return next.length > 140 ? next.slice(next.length - 140) : next
+      return next.length > 160 ? next.slice(next.length - 160) : next
     })
   }, [])
 
   const transition = useCallback(
     (next: TrackState) => {
       if (stateRef.current === next) return
+      const previous = stateRef.current
       stateRef.current = next
       snapshotRef.current.state = next
       setState(next)
-      if (next === 'LOCKED') push('lock', 'Closed-loop lock acquired · residual within budget')
-      if (next === 'ACQUIRED') push('info', 'Beacon candidate promoted to track')
-      if (next === 'SEARCHING') push('signal', 'Sweeping search volume for beacon return')
-      if (next === 'TRACK_LOST') push('fault', 'Track lost · return below detection floor')
+
+      if (next === 'LOCKED') {
+        const m = metrics.current
+        if (previous === 'TRACK_LOST' || m.lostAt > 0) {
+          m.reacquisitionS = (elapsed.current - m.lostAt) / 1000
+          m.lostAt = 0
+          push('lock', `Re-acquired in ${m.reacquisitionS.toFixed(2)} s · boresight restored`)
+        } else {
+          if (m.acquisitionS === 0) m.acquisitionS = elapsed.current / 1000
+          push('lock', `Lock acquired at T+${(elapsed.current / 1000).toFixed(2)} s`)
+        }
+      }
+      if (next === 'ACQUIRED') push('info', 'Candidate promoted to track · closing on boresight')
+      if (next === 'SEARCHING') push('signal', 'Scanning search volume for beacon return')
+      if (next === 'TRACK_LOST') {
+        metrics.current.lostAt = elapsed.current
+        push('fault', 'Track lost · return below detection floor')
+      }
     },
     [push],
   )
 
   const reset = useCallback(() => {
-    elapsedRef.current = 0
-    frameRef.current = 0
-    lockTimerRef.current = 0
-    occlusionRef.current = { active: false, until: 0, next: 6200 }
-    smoothedRef.current = { x: 0.5, y: 0.5 }
-    velocityRef.current = { x: 0, y: 0 }
-    errorRef.current = 1
+    elapsed.current = 0
+    frames.current = 0
+    lastPublish.current = 0
+    motion.current = initialMotionState()
+    gimbal.current = { pan: 0, tilt: 42 }
+    estimate.current = { az: 0, el: 42, vAz: 0, vEl: 0, valid: false }
+    occlusion.current = { active: false, until: 0, next: 9000 }
+    lockTimer.current = 0
+    lostTimer.current = 0
+    searchPhase.current = 0
+    metrics.current = {
+      lockedMs: 0,
+      runMs: 0,
+      peakMrad: 0,
+      acquisitionS: 0,
+      reacquisitionS: 0,
+      lostAt: 0,
+      fpsEma: 60,
+    }
     stateRef.current = 'SEARCHING'
     snapshotRef.current.trail = []
     snapshotRef.current.state = 'SEARCHING'
     setState('SEARCHING')
+    setTelemetry(emptyTelemetry())
     setHistory([])
     setLog([])
-    logIdRef.current = 0
-  }, [])
+    logId.current = 0
+    push('info', 'Run reset · simulation clock zeroed')
+  }, [push])
+
+  // Decoys are re-seeded whenever they are switched on.
+  useEffect(() => {
+    if (!params.decoys) {
+      decoys.current = []
+      return
+    }
+    decoys.current = Array.from({ length: 4 }, () => ({
+      az: (Math.random() - 0.5) * 18,
+      el: 42 + (Math.random() - 0.5) * 12,
+      drift: (Math.random() - 0.5) * 0.00016,
+      bright: 0.35 + Math.random() * 0.4,
+    }))
+  }, [params.decoys])
 
   useEffect(() => {
     let raf = 0
@@ -166,104 +253,215 @@ export function useTracker(params: SimParams) {
       const p = paramsRef.current
       if (!p.running) return
 
-      elapsedRef.current += dt
-      frameRef.current += 1
-      const t = elapsedRef.current
+      elapsed.current += dt
+      frames.current += 1
+      const t = elapsed.current
+      const dtS = dt / 1000
       const snap = snapshotRef.current
+      const m = metrics.current
+      m.runMs += dt
+      m.fpsEma = m.fpsEma * 0.9 + (1000 / Math.max(1, dt)) * 0.1
 
-      // --- Beacon truth ------------------------------------------------------
-      const drift = SCENE_DRIFT[p.scene]
-      const jitterAmp = (p.jitter / 100) * 0.012
-      const truthX =
-        0.5 + Math.sin(t * drift.rate) * drift.span + Math.sin(t * 0.011) * jitterAmp
-      const truthY =
-        0.48 +
-        Math.cos(t * drift.rate * 0.74) * drift.span * 0.55 +
-        Math.cos(t * 0.013) * jitterAmp
-      snap.truth = { x: clamp01(truthX), y: clamp01(truthY) }
+      const turbulence = p.turbulence / 100
+      const vibration = p.vibration / 100
+      const noiseLevel = p.noise / 100
+      const brightness = p.brightness / 100
+      const quality = MODE_QUALITY[p.mode]
 
-      // --- Occlusion ---------------------------------------------------------
-      const occ = occlusionRef.current
-      if (!occ.active && t > occ.next) {
-        occ.active = true
-        occ.until = t + 1400 + Math.random() * 1200
-        push('fault', 'Cloud transit — beacon return occluded')
-      }
-      if (occ.active && t > occ.until) {
+      // --- Where the terminal actually is ----------------------------------
+      const bearing = bearingAt(p.pattern, t, p.speed, motion.current, dt)
+      // Turbulence bends the apparent line of sight; it is not target motion.
+      const wanderAz = Math.sin(t * 0.011) * turbulence * 0.35
+      const wanderEl = Math.cos(t * 0.013) * turbulence * 0.25
+      const trueAz = bearing.az + wanderAz
+      const trueEl = bearing.el + wanderEl
+
+      // --- Occlusion --------------------------------------------------------
+      const occ = occlusion.current
+      if (p.dropouts) {
+        if (!occ.active && t > occ.next) {
+          occ.active = true
+          occ.until = t + 1200 + Math.random() * 1400
+          push('fault', 'Beacon occluded · return lost')
+        }
+        if (occ.active && t > occ.until) {
+          occ.active = false
+          occ.next = t + 8000 + Math.random() * 8000
+          push('signal', 'Occlusion cleared')
+        }
+      } else if (occ.active) {
         occ.active = false
-        occ.next = t + 9000 + Math.random() * 7000
-        push('signal', 'Occlusion cleared — reacquiring')
+        occ.next = t + 9000
       }
       snap.occluded = occ.active
 
-      // --- Detector ----------------------------------------------------------
-      const turbulence = p.turbulence / 100
-      const gain = p.gain / 100
-      const snr = Math.max(0.4, (1.6 + gain * 8.4) / (0.35 + turbulence * 2.6))
-      const noise = (0.004 + turbulence * 0.05) / (0.6 + gain * 1.6)
-      const detectionX = snap.truth.x + (Math.random() - 0.5) * noise * 2
-      const detectionY = snap.truth.y + (Math.random() - 0.5) * noise * 2
+      // --- Camera shake -----------------------------------------------------
+      const shakeAz = Math.sin(t * 0.047) * vibration * 0.5 + Math.sin(t * 0.113) * vibration * 0.22
+      const shakeTilt = Math.cos(t * 0.053) * vibration * 0.34
 
-      const quality = MODE_QUALITY[p.mode]
-      const smoothing = occ.active ? 0.02 : 1 - Math.pow(1 - quality.smoothing, dt / 16)
-      const prevX = smoothedRef.current.x
-      const prevY = smoothedRef.current.y
-      const nextX = prevX + (detectionX - prevX) * smoothing
-      const nextY = prevY + (detectionY - prevY) * smoothing
-      velocityRef.current = { x: nextX - prevX, y: nextY - prevY }
-      smoothedRef.current = { x: nextX, y: nextY }
+      const pan = gimbal.current.pan + shakeAz
+      const tilt = gimbal.current.tilt + shakeTilt
 
-      snap.detection = { x: nextX, y: nextY }
-      snap.prediction = {
-        x: clamp01(nextX + velocityRef.current.x * quality.lead * 14),
-        y: clamp01(nextY + velocityRef.current.y * quality.lead * 14),
+      // --- Detector ---------------------------------------------------------
+      const snr = clamp(
+        (1.2 + brightness * 9) / (0.3 + turbulence * 2.2 + noiseLevel * 2.6),
+        0.2,
+        40,
+      )
+      const jitterDeg = (0.02 + turbulence * 0.22 + noiseLevel * 0.3) / (0.5 + brightness * 1.4)
+
+      const truthProjection = project(trueAz, trueEl, pan, tilt)
+      snap.truth = truthProjection
+
+      const candidates: Candidate[] = []
+      const beaconVisible = truthProjection.inFrame && !occ.active && snr > 1.1
+
+      if (beaconVisible) {
+        const measuredAz = trueAz + (Math.random() - 0.5) * jitterDeg * 2
+        const measuredEl = trueEl + (Math.random() - 0.5) * jitterDeg * 2
+        const proj = project(measuredAz, measuredEl, pan, tilt)
+        candidates.push({ x: proj.x, y: proj.y, score: brightness * clamp(snr / 8, 0, 1.2), decoy: false })
       }
 
-      snap.trail.push({ x: nextX, y: nextY })
+      for (const d of decoys.current) {
+        d.az += Math.sin(t * 0.0002) * d.drift
+        const proj = project(d.az, d.el, pan, tilt)
+        if (proj.inFrame) {
+          candidates.push({ x: proj.x, y: proj.y, score: d.bright * clamp(snr / 10, 0, 1), decoy: true })
+        }
+      }
+      snap.candidates = candidates
+
+      // --- Association ------------------------------------------------------
+      // Score each candidate on brightness and on agreement with the estimator's
+      // prediction. A weak associator follows the brightest thing it sees.
+      const predAz = estimate.current.az + estimate.current.vAz * quality.lead * 0.4
+      const predEl = estimate.current.el + estimate.current.vEl * quality.lead * 0.4
+      const predProj = project(predAz, predEl, pan, tilt)
+
+      let best: Candidate | null = null
+      let bestScore = -Infinity
+      for (const c of candidates) {
+        const gate = estimate.current.valid
+          ? 1 - clamp(Math.hypot(c.x - predProj.x, c.y - predProj.y) / 0.35, 0, 1)
+          : 0.5
+        const score = c.score * (1 - quality.reject) + gate * quality.reject
+        if (score > bestScore) {
+          bestScore = score
+          best = c
+        }
+      }
+
+      const detected = Boolean(best) && bestScore > 0.24
+      if (detected && best) {
+        // Convert the chosen pixel back to a bearing and fold it into the estimate.
+        const measAz = pan + (best.x - 0.5) * 24
+        const measEl = tilt - (best.y - 0.5) * 16
+        const alpha = estimate.current.valid
+          ? 1 - Math.pow(1 - quality.smoothing, dt / 16)
+          : 1
+        const prevAz = estimate.current.az
+        const prevEl = estimate.current.el
+        const nextAz = prevAz + (measAz - prevAz) * alpha
+        const nextEl = prevEl + (measEl - prevEl) * alpha
+        estimate.current.vAz = estimate.current.vAz * 0.85 + ((nextAz - prevAz) / Math.max(dtS, 0.001)) * 0.15
+        estimate.current.vEl = estimate.current.vEl * 0.85 + ((nextEl - prevEl) / Math.max(dtS, 0.001)) * 0.15
+        estimate.current.az = nextAz
+        estimate.current.el = nextEl
+        estimate.current.valid = true
+        lostTimer.current = 0
+      } else {
+        lostTimer.current += dt
+        // Coast on the last velocity for a short while before giving up.
+        if (lostTimer.current < 600 && estimate.current.valid) {
+          estimate.current.az += estimate.current.vAz * dtS
+          estimate.current.el += estimate.current.vEl * dtS
+        } else {
+          estimate.current.valid = false
+        }
+      }
+
+      // --- Gimbal control ---------------------------------------------------
+      // Locked on: lead the target. Lost: run an expanding spiral search.
+      let goalAz: number
+      let goalEl: number
+      if (estimate.current.valid) {
+        goalAz = estimate.current.az + estimate.current.vAz * quality.lead * 0.12
+        goalEl = estimate.current.el + estimate.current.vEl * quality.lead * 0.12
+        snap.searching = false
+      } else {
+        searchPhase.current += dtS * 1.5
+        const radius = Math.min(9, searchPhase.current * 1.6)
+        goalAz = Math.cos(searchPhase.current * 2.1) * radius
+        goalEl = 42 + Math.sin(searchPhase.current * 2.1) * radius * 0.55
+        snap.searching = true
+      }
+      if (estimate.current.valid) searchPhase.current = 0
+
+      gimbal.current.pan = slew(gimbal.current.pan, goalAz, dtS)
+      gimbal.current.tilt = slew(gimbal.current.tilt, goalEl, dtS)
+
+      // --- Error ------------------------------------------------------------
+      const errDeg = angularError(trueAz, trueEl, gimbal.current.pan, gimbal.current.tilt)
+      const errMrad = degToMrad(errDeg)
+      const errPx = errDeg / DEG_PER_PX
+      if (errMrad > m.peakMrad && beaconVisible) m.peakMrad = errMrad
+
+      // --- Confidence and state --------------------------------------------
+      const gateQuality = detected ? clamp(bestScore, 0, 1) : 0
+      const target = occ.active || !detected ? 0 : gateQuality * clamp(snr / 7, 0, 1)
+      snap.confidence += (target - snap.confidence) * 0.08
+      snap.boxSize = 0.05 + (1 - snap.confidence) * 0.1 + turbulence * 0.03
+
+      snap.detection = best ? { x: best.x, y: best.y } : predProj
+      snap.prediction = project(
+        estimate.current.az + estimate.current.vAz * quality.lead * 0.25,
+        estimate.current.el + estimate.current.vEl * quality.lead * 0.25,
+        pan,
+        tilt,
+      )
+      snap.trail.push({ ...snap.detection })
       if (snap.trail.length > TRAIL_LENGTH) snap.trail.shift()
 
-      const residual = Math.hypot(nextX - snap.truth.x, nextY - snap.truth.y)
-      errorRef.current = errorRef.current * 0.9 + residual * 0.1
-
-      // --- Confidence and state ---------------------------------------------
-      const sweepBoost = 0.4 + (p.sweep / 100) * 0.9
-      const target = occ.active ? 0 : clamp01((snr / 10) * (1 - residual * 22) * sweepBoost)
-      snap.confidence = snap.confidence + (target - snap.confidence) * 0.06
-      snap.boxSize = 0.05 + (1 - snap.confidence) * 0.14 + turbulence * 0.04
-
-      if (occ.active) {
-        lockTimerRef.current = 0
+      if (!detected) {
+        lockTimer.current = 0
         if (stateRef.current === 'LOCKED' || stateRef.current === 'ACQUIRED') {
-          transition('TRACK_LOST')
+          if (lostTimer.current > 400) transition('TRACK_LOST')
+        } else {
+          transition('SEARCHING')
         }
-      } else if (snap.confidence > 0.72) {
-        lockTimerRef.current += dt
-        transition(lockTimerRef.current > 900 ? 'LOCKED' : 'ACQUIRED')
-      } else if (snap.confidence > 0.32) {
-        lockTimerRef.current = 0
+      } else if (errDeg < LOCK_DEG && snap.confidence > 0.55) {
+        lockTimer.current += dt
+        transition(lockTimer.current > 500 ? 'LOCKED' : 'ACQUIRED')
+      } else if (errDeg < ACQUIRE_DEG) {
+        lockTimer.current = 0
         transition('ACQUIRED')
       } else {
-        lockTimerRef.current = 0
-        transition('SEARCHING')
+        lockTimer.current = 0
+        transition('ACQUIRED')
       }
 
-      // --- Publish -----------------------------------------------------------
-      if (t - lastPublishRef.current > PUBLISH_MS) {
-        lastPublishRef.current = t
-        const azimuth = (snap.detection.x - 0.5) * 24
-        const elevation = (0.5 - snap.detection.y) * 16 + 42
-        const range =
-          p.scene === 'geo' ? 35786 + Math.sin(t * 0.0002) * 4 : p.scene === 'leo' ? 812 + Math.sin(t * 0.0004) * 22 : 12.4 + Math.sin(t * 0.0006) * 0.3
+      if (stateRef.current === 'LOCKED') m.lockedMs += dt
+
+      // --- Publish ----------------------------------------------------------
+      if (t - lastPublish.current > PUBLISH_MS) {
+        lastPublish.current = t
 
         setTelemetry({
-          azimuth,
-          elevation,
-          range,
+          pan: gimbal.current.pan,
+          tilt: gimbal.current.tilt,
+          errorPx: errPx,
+          errorMrad: errMrad,
+          peakErrorMrad: m.peakMrad,
           confidence: snap.confidence * 100,
-          latency: quality.cost + turbulence * 4.2 + Math.random() * 0.6,
-          frame: frameRef.current,
-          rmsError: errorRef.current * 1000,
-          snr,
+          snr: 10 * Math.log10(Math.max(snr, 0.05)),
+          frame: frames.current,
+          fps: m.fpsEma,
+          processingMs: quality.cost + turbulence * 3 + candidates.length * 0.35,
+          lockRetention: m.runMs > 0 ? (m.lockedMs / m.runMs) * 100 : 0,
+          acquisitionS: m.acquisitionS,
+          reacquisitionS: m.reacquisitionS,
+          candidates: candidates.length,
         })
 
         setHistory((prev) => {
@@ -271,8 +469,11 @@ export function useTracker(params: SimParams) {
             ...prev,
             {
               t: Math.round(t / 100) / 10,
-              error: Number((errorRef.current * 1000).toFixed(2)),
-              confidence: Number((snap.confidence * 100).toFixed(1)),
+              errorMrad: Number(errMrad.toFixed(2)),
+              targetAz: Number(trueAz.toFixed(3)),
+              predictedAz: Number(estimate.current.az.toFixed(3)),
+              pan: Number(gimbal.current.pan.toFixed(3)),
+              locked: stateRef.current === 'LOCKED' ? 1 : 0,
             },
           ]
           return next.length > HISTORY_LENGTH ? next.slice(next.length - HISTORY_LENGTH) : next
@@ -288,8 +489,8 @@ export function useTracker(params: SimParams) {
   useEffect(() => {
     if (seeded.current) return
     seeded.current = true
-    push('info', 'NETRA ground segment online · simulation clock started')
-    push('signal', 'Sweeping search volume for beacon return')
+    push('info', 'Virtual camera online · FOV 24° × 16°, 1280 px')
+    push('signal', 'Scanning search volume for beacon return')
   }, [push])
 
   return { state, telemetry, log, history, snapshotRef, reset }

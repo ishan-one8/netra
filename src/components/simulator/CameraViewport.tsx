@@ -89,11 +89,22 @@ export function CameraViewport({
       }
       ctx.globalAlpha = 1
 
+      for (const c of snap.candidates) {
+        if (!c.decoy) continue
+        const g = ctx.createRadialGradient(c.x * width, c.y * height, 0, c.x * width, c.y * height, 16)
+        g.addColorStop(0, `rgba(255,255,255,${0.16 + c.score * 0.2})`)
+        g.addColorStop(1, 'rgba(255,255,255,0)')
+        ctx.fillStyle = g
+        ctx.beginPath()
+        ctx.arc(c.x * width, c.y * height, 16, 0, Math.PI * 2)
+        ctx.fill()
+      }
+
       const bx = snap.truth.x * width
       const by = snap.truth.y * height
 
       // The beacon itself.
-      if (!snap.occluded) {
+      if (!snap.occluded && snap.truth.inFrame) {
         const glow = ctx.createRadialGradient(bx, by, 0, bx, by, 30)
         glow.addColorStop(0, 'rgba(255,255,255,0.5)')
         glow.addColorStop(1, 'rgba(255,255,255,0)')
@@ -111,6 +122,43 @@ export function CameraViewport({
       const dx = snap.detection.x * width
       const dy = snap.detection.y * height
       const beam = token('beam')
+
+      // --- Boresight: where the gimbal is actually pointed -----------------
+      ctx.strokeStyle = 'rgba(255,255,255,0.55)'
+      ctx.lineWidth = 1
+      const bs = 14
+      ctx.beginPath()
+      ctx.moveTo(width / 2 - bs, height / 2)
+      ctx.lineTo(width / 2 - 4, height / 2)
+      ctx.moveTo(width / 2 + 4, height / 2)
+      ctx.lineTo(width / 2 + bs, height / 2)
+      ctx.moveTo(width / 2, height / 2 - bs)
+      ctx.lineTo(width / 2, height / 2 - 4)
+      ctx.moveTo(width / 2, height / 2 + 4)
+      ctx.lineTo(width / 2, height / 2 + bs)
+      ctx.stroke()
+      ctx.strokeStyle = 'rgba(255,255,255,0.22)'
+      ctx.beginPath()
+      ctx.arc(width / 2, height / 2, 26, 0, Math.PI * 2)
+      ctx.stroke()
+
+      // --- Rejected candidates ---------------------------------------------
+      // Every decoy the detector proposed and the associator threw away.
+      for (const c of snap.candidates) {
+        if (!c.decoy) continue
+        const cx1 = c.x * width
+        const cy1 = c.y * height
+        ctx.strokeStyle = 'rgba(255,255,255,0.3)'
+        ctx.beginPath()
+        ctx.arc(cx1, cy1, 9, 0, Math.PI * 2)
+        ctx.stroke()
+        ctx.beginPath()
+        ctx.moveTo(cx1 - 4.5, cy1 - 4.5)
+        ctx.lineTo(cx1 + 4.5, cy1 + 4.5)
+        ctx.moveTo(cx1 + 4.5, cy1 - 4.5)
+        ctx.lineTo(cx1 - 4.5, cy1 + 4.5)
+        ctx.stroke()
+      }
 
       // Track trail.
       ctx.strokeStyle = alpha('beam', 0.35)
@@ -228,7 +276,7 @@ export function CameraViewport({
         </div>
         <div className="flex items-end justify-between gap-16">
           <span className="font-mono text-hud uppercase tracking-label text-surface/60">
-            FOV 24° × 16°
+            FOV 24° × 16° · 1280 px
           </span>
           <span className="font-mono text-hud uppercase tracking-label text-surface/60">
             {modeLabel}

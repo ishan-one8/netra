@@ -7,7 +7,9 @@ import { cx } from '../../lib/cx'
 const LINKS = [
   { label: 'Problem', id: 'problem' },
   { label: 'System', id: 'system' },
-  { label: 'Pipeline', id: 'pipeline' },
+  { label: 'Evidence', id: 'evidence' },
+  { label: 'Architecture', id: 'architecture' },
+  { label: 'Team', id: 'team' },
 ]
 
 export function SiteNav() {
@@ -56,7 +58,7 @@ export function SiteNav() {
           <LogoMark />
         </a>
 
-        <div className="hidden items-center gap-24 md:flex">
+        <div className="hidden items-center gap-20 lg:flex">
           {onSimulator ? (
             <NavLink to="/">Overview</NavLink>
           ) : (

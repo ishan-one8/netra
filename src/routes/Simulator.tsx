@@ -1,8 +1,12 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { CameraViewport } from '../components/simulator/CameraViewport'
 import { EventLog } from '../components/simulator/EventLog'
-import { ResidualChart } from '../components/simulator/ResidualChart'
+import { MetricGrid } from '../components/simulator/MetricGrid'
+import { DisturbancePanel } from '../components/simulator/DisturbancePanel'
+import { StressTestPanel } from '../components/simulator/StressTestPanel'
+import { ErrorChart, GimbalChart, LockChart, PredictionChart } from '../components/simulator/Charts'
 import {
+  Badge,
   Button,
   Card,
   ControlRow,
@@ -10,16 +14,10 @@ import {
   Label,
   SegmentedControl,
   StatusChip,
-  TelemetryReadout,
 } from '../components/system'
-import { useTracker } from '../sim/useTracker'
-import type { Scene, TrackerMode } from '../sim/useTracker'
-
-const SCENES = [
-  { value: 'leo', label: 'LEO pass' },
-  { value: 'geo', label: 'GEO hold' },
-  { value: 'ground', label: 'Ground' },
-] as const satisfies ReadonlyArray<{ value: Scene; label: string }>
+import { useTracker, type SimParams, type TrackerMode } from '../sim/useTracker'
+import { useStressTest, type Sample } from '../sim/useStressTest'
+import { MOTION_PATTERNS, type MotionPattern } from '../sim/motion'
 
 const MODES = [
   { value: 'centroid', label: 'Centroid' },
@@ -27,27 +25,51 @@ const MODES = [
   { value: 'correlation', label: 'Correlation' },
 ] as const satisfies ReadonlyArray<{ value: TrackerMode; label: string }>
 
-export function Simulator() {
-  const [scene, setScene] = useState<Scene>('leo')
-  const [mode, setMode] = useState<TrackerMode>('kalman')
-  const [turbulence, setTurbulence] = useState(38)
-  const [jitter, setJitter] = useState(24)
-  const [gain, setGain] = useState(62)
-  const [sweep, setSweep] = useState(70)
-  const [running, setRunning] = useState(true)
-  const [controlsOpen, setControlsOpen] = useState(false)
+const PATTERNS = MOTION_PATTERNS.map(({ value, label }) => ({ value, label }))
 
-  const { state, telemetry, log, history, snapshotRef, reset } = useTracker({
-    turbulence,
-    jitter,
-    gain,
-    sweep,
-    mode,
-    scene,
-    running,
+const QUICK_INJECT = [
+  { label: 'High noise', patch: { noise: 85, brightness: 55 } },
+  { label: 'Strong vibration', patch: { vibration: 85 } },
+  { label: 'Hazy atmosphere', patch: { turbulence: 85, brightness: 60 } },
+  { label: 'Fast target', patch: { speed: 2.6 } },
+] as const
+
+export function Simulator() {
+  const [base, setBase] = useState<Omit<SimParams, 'running'>>({
+    pattern: 'orbital',
+    speed: 1,
+    turbulence: 25,
+    vibration: 15,
+    noise: 15,
+    brightness: 88,
+    decoys: false,
+    dropouts: false,
+    mode: 'kalman',
+  })
+  const [overrides, setOverrides] = useState<Partial<SimParams> | null>(null)
+  const [running, setRunning] = useState(true)
+
+  const params: SimParams = useMemo(
+    () => ({ ...base, ...(overrides ?? {}), running }),
+    [base, overrides, running],
+  )
+
+  const { state, telemetry, log, history, snapshotRef, reset } = useTracker(params)
+
+  // The stress test reads the loop through a ref so its timer never sees a
+  // stale render.
+  const sampleRef = useRef<Sample>({ errorMrad: 0, state: 'SEARCHING' })
+  useEffect(() => {
+    sampleRef.current = { errorMrad: telemetry.errorMrad, state }
   })
 
-  // Space holds the loop, R restarts the run.
+  const applyOverrides = useCallback((next: Partial<SimParams> | null) => {
+    setOverrides(next)
+    if (next) setRunning(true)
+  }, [])
+
+  const stress = useStressTest({ apply: applyOverrides, sampleRef })
+
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
       const target = event.target as HTMLElement | null
@@ -62,183 +84,224 @@ export function Simulator() {
     return () => window.removeEventListener('keydown', onKey)
   }, [reset])
 
-  const sceneLabel = SCENES.find((s) => s.value === scene)?.label ?? ''
-  const modeLabel = MODES.find((m) => m.value === mode)?.label ?? ''
+  const patch = (next: Partial<Omit<SimParams, 'running'>>) =>
+    setBase((prev) => ({ ...prev, ...next }))
 
-  const controls = (
-    <div className="flex flex-col gap-24">
-      <div className="flex flex-col gap-8">
-        <Label>Scene</Label>
-        <SegmentedControl label="Scene" options={SCENES} value={scene} onChange={setScene} />
-      </div>
-
-      <div className="flex flex-col gap-8">
-        <Label>Estimator</Label>
-        <SegmentedControl label="Estimator" options={MODES} value={mode} onChange={setMode} />
-      </div>
-
-      <Hairline />
-
-      <div className="flex flex-col gap-12">
-        <Label>Channel</Label>
-        <ControlRow
-          label="Turbulence"
-          value={turbulence}
-          min={0}
-          max={100}
-          unit="%"
-          hint="Atmospheric scintillation and beam wander"
-          onChange={setTurbulence}
-        />
-        <ControlRow
-          label="Platform jitter"
-          value={jitter}
-          min={0}
-          max={100}
-          unit="%"
-          hint="Vibration of the mount the terminal sits on"
-          onChange={setJitter}
-        />
-      </div>
-
-      <div className="flex flex-col gap-12">
-        <Label>Detector</Label>
-        <ControlRow
-          label="Gain"
-          value={gain}
-          min={0}
-          max={100}
-          unit="%"
-          hint="Higher gain lifts SNR and suppresses noise"
-          onChange={setGain}
-        />
-        <ControlRow
-          label="Sweep rate"
-          value={sweep}
-          min={0}
-          max={100}
-          unit="%"
-          hint="How fast the search volume is covered"
-          onChange={setSweep}
-        />
-      </div>
-
-      <Hairline />
-
-      <div className="flex flex-wrap items-center gap-8">
-        <Button onClick={() => setRunning((r) => !r)}>
-          {running ? 'Hold the loop' : 'Run the loop'}
-        </Button>
-        <Button variant="secondary" onClick={reset}>
-          Reset
-        </Button>
-      </div>
-
-      <p className="font-mono text-hud uppercase tracking-label text-ink-faint">
-        Space holds · R resets
-      </p>
-    </div>
-  )
+  const locked = stress.running
+  const patternDetail = MOTION_PATTERNS.find((p) => p.value === params.pattern)?.detail ?? ''
 
   return (
-    <main className="page-wide py-24 lg:py-32">
-      <div className="mb-24 flex flex-wrap items-end justify-between gap-16">
+    <main className="page-wide flex flex-col gap-24 py-24 lg:py-32">
+      {/* ---- Header ------------------------------------------------------- */}
+      <header className="flex flex-wrap items-end justify-between gap-16">
         <div className="flex flex-col gap-4">
           <Label tone="beam">Coarse alignment · virtual camera</Label>
-          <h1 className="text-heading-sm font-medium tracking-tight text-ink">Tracking simulator</h1>
+          <h1 className="text-heading-sm font-medium tracking-tight text-ink">Mission console</h1>
         </div>
-        <StatusChip state={state} />
-      </div>
+        <div className="flex flex-wrap items-center gap-12">
+          <StatusChip state={state} />
+          <Button onClick={() => setRunning((r) => !r)}>{running ? 'Hold' : 'Run'}</Button>
+          <Button variant="secondary" onClick={reset}>
+            Reset
+          </Button>
+        </div>
+      </header>
 
-      <div className="sim-grid">
-        {/* ---- Controls -------------------------------------------------- */}
-        <aside className="sim-area-controls">
-          <button
-            type="button"
-            aria-expanded={controlsOpen}
-            onClick={() => setControlsOpen((open) => !open)}
-            className="mb-12 flex min-h-[44px] w-full items-center justify-between gap-16 rounded-md border border-rule bg-surface px-16 shadow-xs lg:hidden"
-          >
-            <Label>Controls</Label>
-            <span className="text-body text-ink-muted">{controlsOpen ? '−' : '+'}</span>
-          </button>
+      <Card className="flex flex-wrap items-center gap-12 px-16 py-12">
+        <Badge tone="beam">Simulation</Badge>
+        <p className="text-caption text-ink-muted">
+          Every value on this page is produced by the simulation — a virtual camera, a virtual
+          beacon and modelled disturbances. Nothing here is measured from real optical hardware.
+        </p>
+      </Card>
 
-          <Card className={controlsOpen ? 'block p-20' : 'hidden p-20 lg:block'}>{controls}</Card>
-        </aside>
-
-        {/* ---- Viewport --------------------------------------------------- */}
-        <section className="sim-area-main">
-          <Card className="p-12 sm:p-16">
-            <div className="flex flex-wrap items-center justify-between gap-12 px-4 pb-12">
-              <span className="font-mono text-hud uppercase tracking-label text-ink-faint">
-                {sceneLabel} · {modeLabel}
-              </span>
-              <span className="font-mono text-hud uppercase tracking-label text-ink-faint">
-                {running ? 'Running' : 'Held'}
-              </span>
+      <div className="grid gap-20 xl:grid-cols-[320px_minmax(0,1fr)_320px]">
+        {/* ---- Controls --------------------------------------------------- */}
+        <aside className="flex flex-col gap-16">
+          <Card className="flex flex-col gap-20 p-20">
+            <div className="flex flex-col gap-8">
+              <Label>Target motion</Label>
+              <SegmentedControl
+                label="Target motion"
+                options={PATTERNS}
+                value={params.pattern}
+                onChange={(v: MotionPattern) => patch({ pattern: v })}
+              />
+              <p className="text-caption text-ink-faint">{patternDetail}</p>
             </div>
-            <CameraViewport
-              snapshotRef={snapshotRef}
-              modeLabel={modeLabel}
-              sceneLabel={sceneLabel}
-              frame={telemetry.frame}
-            />
-          </Card>
-        </section>
 
-        {/* ---- Telemetry --------------------------------------------------- */}
-        <section className="sim-area-telemetry">
-          <Card className="flex flex-col gap-24 p-20">
-            <TelemetryReadout
-              label="Residual, RMS"
-              value={telemetry.rmsError}
-              unit="µrad"
-              decimals={2}
-              size="lg"
-              meter={Math.min(1, telemetry.rmsError / 60)}
-              meterTone={
-                state === 'TRACK_LOST' ? 'fault' : state === 'LOCKED' ? 'lock' : 'beam'
-              }
-            />
-
-            <Hairline />
-
-            <div className="grid grid-cols-2 gap-20">
-              <TelemetryReadout label="Azimuth" value={telemetry.azimuth} unit="°" />
-              <TelemetryReadout label="Elevation" value={telemetry.elevation} unit="°" />
-              <TelemetryReadout label="Range" value={telemetry.range} unit="km" decimals={1} />
-              <TelemetryReadout
-                label="Confidence"
-                value={telemetry.confidence}
-                unit="%"
-                decimals={1}
+            <div className="flex flex-col gap-8">
+              <Label>Estimator</Label>
+              <SegmentedControl
+                label="Estimator"
+                options={MODES}
+                value={params.mode}
+                onChange={(v: TrackerMode) => patch({ mode: v })}
               />
-              <TelemetryReadout
-                label="Loop latency"
-                value={telemetry.latency}
-                unit="ms"
-                decimals={1}
-              />
-              <TelemetryReadout label="SNR" value={telemetry.snr} unit="dB" decimals={1} />
             </div>
 
             <Hairline />
 
             <div className="flex flex-col gap-12">
-              <Label>Residual · confidence</Label>
-              <ResidualChart data={history} />
+              <Label>Conditions</Label>
+              <ControlRow
+                label="Target speed"
+                value={params.speed}
+                min={0.25}
+                max={3}
+                step={0.05}
+                decimals={2}
+                unit="×"
+                disabled={locked}
+                onChange={(v) => patch({ speed: v })}
+              />
+              <ControlRow
+                label="Turbulence"
+                value={params.turbulence}
+                min={0}
+                max={100}
+                unit="%"
+                hint="Scintillation and beam wander"
+                disabled={locked}
+                onChange={(v) => patch({ turbulence: v })}
+              />
+              <ControlRow
+                label="Platform vibration"
+                value={params.vibration}
+                min={0}
+                max={100}
+                unit="%"
+                hint="Shake of the camera mount"
+                disabled={locked}
+                onChange={(v) => patch({ vibration: v })}
+              />
+              <ControlRow
+                label="Sensor noise"
+                value={params.noise}
+                min={0}
+                max={100}
+                unit="%"
+                disabled={locked}
+                onChange={(v) => patch({ noise: v })}
+              />
+              <ControlRow
+                label="Beacon brightness"
+                value={params.brightness}
+                min={10}
+                max={100}
+                unit="%"
+                disabled={locked}
+                onChange={(v) => patch({ brightness: v })}
+              />
             </div>
+
+            <Hairline />
+
+            <DisturbancePanel
+              toggles={[
+                {
+                  key: 'decoys',
+                  label: 'Decoy light sources',
+                  detail: 'Competing bright objects the associator must reject',
+                  active: params.decoys,
+                  onToggle: () => patch({ decoys: !base.decoys }),
+                },
+                {
+                  key: 'dropouts',
+                  label: 'Beacon dropout',
+                  detail: 'The return vanishes and has to be re-acquired',
+                  active: params.dropouts,
+                  onToggle: () => patch({ dropouts: !base.dropouts }),
+                },
+              ]}
+            />
+
+            <div className="flex flex-col gap-8">
+              <Label>Quick inject</Label>
+              <div className="flex flex-wrap gap-8">
+                {QUICK_INJECT.map((q) => (
+                  <button
+                    key={q.label}
+                    type="button"
+                    disabled={locked}
+                    onClick={() => patch(q.patch)}
+                    className="inline-flex min-h-[36px] items-center rounded-full border border-rule bg-surface px-12 text-caption text-ink-muted transition-colors duration-200 hover:border-rule-strong hover:text-ink disabled:opacity-40"
+                  >
+                    {q.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <p className="font-mono text-hud uppercase tracking-label text-ink-faint">
+              Space holds · R resets
+            </p>
+          </Card>
+        </aside>
+
+        {/* ---- Viewport and metrics --------------------------------------- */}
+        <section className="flex flex-col gap-20">
+          <Card className="p-12 sm:p-16">
+            <div className="flex flex-wrap items-center justify-between gap-12 px-4 pb-12">
+              <span className="font-mono text-hud uppercase tracking-label text-ink-faint">
+                Pan {telemetry.pan.toFixed(2)}° · Tilt {telemetry.tilt.toFixed(2)}°
+              </span>
+              <span className="font-mono text-hud uppercase tracking-label text-ink-faint">
+                {stress.running ? 'Stress test' : running ? 'Running' : 'Held'}
+              </span>
+            </div>
+            <CameraViewport
+              snapshotRef={snapshotRef}
+              modeLabel={MODES.find((m) => m.value === params.mode)?.label ?? ''}
+              sceneLabel={PATTERNS.find((p) => p.value === params.pattern)?.label ?? ''}
+              frame={telemetry.frame}
+            />
+          </Card>
+
+          <Card className="p-20">
+            <MetricGrid telemetry={telemetry} />
           </Card>
         </section>
 
         {/* ---- Log --------------------------------------------------------- */}
-        <section className="sim-area-log">
+        <section>
           <Card className="flex flex-col gap-16 p-20">
             <Label>Event log</Label>
             <EventLog entries={log} />
           </Card>
         </section>
       </div>
+
+      {/* ---- Performance --------------------------------------------------- */}
+      <Card className="flex flex-col gap-24 p-20 sm:p-24">
+        <div className="flex flex-wrap items-end justify-between gap-12">
+          <div className="flex flex-col gap-4">
+            <Label tone="beam">Performance</Label>
+            <p className="text-small text-ink-muted">
+              Computed live from the running loop. The charts scroll with the simulation.
+            </p>
+          </div>
+        </div>
+        <div className="grid gap-24 lg:grid-cols-2">
+          <ErrorChart data={history} />
+          <PredictionChart data={history} />
+          <GimbalChart data={history} />
+          <LockChart data={history} />
+        </div>
+      </Card>
+
+      {/* ---- Stress test ---------------------------------------------------- */}
+      <Card className="p-20 sm:p-24">
+        <StressTestPanel
+          running={stress.running}
+          phaseIndex={stress.phaseIndex}
+          progress={stress.progress}
+          report={stress.report}
+          totalSeconds={stress.totalSeconds}
+          onStart={stress.start}
+          onCancel={stress.cancel}
+        />
+      </Card>
     </main>
   )
 }
