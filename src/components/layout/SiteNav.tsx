@@ -49,7 +49,7 @@ export function SiteNav() {
       className={cx(
         'sticky top-0 z-50 transition-all duration-300 ease-out',
         scrolled || onSimulator
-          ? 'border-b border-rule bg-paper/80 backdrop-blur-md'
+          ? 'border-b border-rule bg-paper/70 backdrop-blur-xl'
           : 'border-b border-transparent',
       )}
     >

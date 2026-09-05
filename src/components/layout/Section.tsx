@@ -24,9 +24,9 @@ export function Section({
       id={id}
       className={cx(
         'relative w-full scroll-mt-64 overflow-hidden py-64 lg:py-96',
-        surface === 'surface' && 'border-y border-rule bg-surface',
-        surface === 'warm' && 'border-y border-rule bg-surface-warm',
-        surface === 'cool' && 'border-y border-rule bg-surface-cool',
+        surface === 'surface' && 'border-y border-rule bg-veil',
+        surface === 'warm' && 'border-y border-rule bg-veil-warm',
+        surface === 'cool' && 'border-y border-rule bg-veil-cool',
         className,
       )}
     >

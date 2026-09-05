@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { alpha, token } from '../../lib/tokens'
 import { cx } from '../../lib/cx'
+import { useOnScreen } from '../../lib/useOnScreen'
 import { prefersReducedMotion } from '../../lib/motion'
 import type { TrackState } from '../../sim/types'
 
@@ -24,6 +25,7 @@ export function OrbitalScene({
   className?: string
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
+  const onScreen = useOnScreen(canvasRef)
   const onStateRef = useRef(onState)
   useEffect(() => {
     onStateRef.current = onState
@@ -79,6 +81,7 @@ export function OrbitalScene({
     }
 
     const draw = (t: number) => {
+      if (!onScreen.current) return
       ctx.clearRect(0, 0, width, height)
 
       // --- Earth ------------------------------------------------------------
@@ -265,7 +268,7 @@ export function OrbitalScene({
       cancelAnimationFrame(raf)
       observer.disconnect()
     }
-  }, [])
+  }, [onScreen])
 
   return <canvas ref={canvasRef} aria-hidden className={cx('block size-full', className)} />
 }

@@ -12,10 +12,11 @@
 
   --color-paper: #06060a;        /* deep space — cool, never navy-blue */
   --color-surface: #0e0e14;      /* cards and raised panels */
-  /* Tinted grounds. Sections alternate through these so the page has
-     temperature instead of one long stretch of black. */
-  --color-surface-warm: #141010;
-  --color-surface-cool: #0b0c16;
+  /* Section veils. Translucent on purpose: the starfield sits behind the whole
+     site, so a section tints the sky rather than covering it. */
+  --color-veil: rgba(255, 255, 255, 0.028);
+  --color-veil-warm: rgba(255, 110, 60, 0.05);
+  --color-veil-cool: rgba(122, 92, 255, 0.055);
   --color-ink: #f6f6f8;          /* headings, primary text */
   --color-ink-muted: #9c9caa;    /* body, secondary text */
   --color-ink-faint: #61616f;    /* captions, axis labels, disabled */

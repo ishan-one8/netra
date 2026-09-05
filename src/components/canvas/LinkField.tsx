@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { alpha, token } from '../../lib/tokens'
 import { cx } from '../../lib/cx'
+import { useOnScreen } from '../../lib/useOnScreen'
 import { prefersReducedMotion } from '../../lib/motion'
 
 type Glyph = {
@@ -29,6 +30,7 @@ export function LinkField({
   className?: string
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
+  const onScreen = useOnScreen(canvasRef)
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -74,6 +76,7 @@ export function LinkField({
     }
 
     const draw = (t: number) => {
+      if (!onScreen.current) return
       ctx.clearRect(0, 0, width, height)
 
       const ax = width * 0.22 + Math.sin(t * 0.00013) * width * 0.05
@@ -174,7 +177,7 @@ export function LinkField({
       cancelAnimationFrame(raf)
       observer.disconnect()
     }
-  }, [verticalCenter])
+  }, [verticalCenter, onScreen])
 
   return <canvas ref={canvasRef} aria-hidden className={cx('block size-full', className)} />
 }

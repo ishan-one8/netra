@@ -861,3 +861,19 @@
     display: none;
   }
 }
+
+/* ---- Galaxy ---------------------------------------------------------------
+   One fixed field behind every page. Sections above it are translucent veils,
+   so the stars carry through the whole site rather than stopping at the hero. */
+.starfield {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  display: block;
+}
+
+.site-shell {
+  position: relative;
+  z-index: 1;
+}

@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react'
 import type { SimSnapshot } from '../../sim/useTracker'
 import { alpha, token } from '../../lib/tokens'
 import { cx } from '../../lib/cx'
+import { useOnScreen } from '../../lib/useOnScreen'
 
 type Props = {
   snapshotRef: React.RefObject<SimSnapshot>
@@ -25,6 +26,7 @@ export function CameraViewport({
   className,
 }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
+  const onScreen = useOnScreen(canvasRef)
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -61,7 +63,7 @@ export function CameraViewport({
     const draw = (t: number) => {
       raf = requestAnimationFrame(draw)
       const snap = snapshotRef.current
-      if (!snap) return
+      if (!snap || !onScreen.current) return
 
       ctx.fillStyle = token('sensor')
       ctx.fillRect(0, 0, width, height)
@@ -271,7 +273,7 @@ export function CameraViewport({
       cancelAnimationFrame(raf)
       observer.disconnect()
     }
-  }, [snapshotRef])
+  }, [snapshotRef, onScreen])
 
   return (
     <div
