@@ -300,3 +300,115 @@
     gap: var(--spacing-24);
   }
 }
+
+/* ---- Micro-interactions ---------------------------------------------------
+   Restraint is the point. Every interactive element acknowledges the pointer,
+   none of them perform. */
+
+/* A link whose underline grows from the left rather than appearing. */
+.link-underline {
+  position: relative;
+}
+
+.link-underline::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 6px;
+  height: 1px;
+  width: 100%;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 300ms var(--ease-out);
+}
+
+.link-underline:hover::after,
+.link-underline[data-active='true']::after {
+  transform: scaleX(1);
+}
+
+.link-underline[data-active='true']::after {
+  background: var(--color-beam);
+}
+
+/* The arrow on an action slides forward as the pointer arrives. */
+.btn-arrow {
+  display: inline-block;
+  transition: transform 250ms var(--ease-out);
+}
+
+.group\/btn:hover .btn-arrow {
+  transform: translateX(3px);
+}
+
+/* Cards that lead somewhere lift; cards that only hold text do not. */
+.card-interactive {
+  transition:
+    transform 300ms var(--ease-out),
+    box-shadow 300ms var(--ease-out),
+    border-color 300ms var(--ease-out);
+}
+
+.card-interactive:hover {
+  transform: translateY(-2px);
+  border-color: var(--color-rule-strong);
+  box-shadow: var(--shadow-md);
+}
+
+/* Scroll position, as a hairline of beam across the very top. */
+.scroll-progress {
+  position: fixed;
+  inset-inline: 0;
+  top: 0;
+  z-index: 60;
+  height: 2px;
+  transform-origin: left center;
+  background: var(--color-beam);
+  transition: transform 80ms linear;
+}
+
+/* A status change gets one flash, then settles. */
+@keyframes netra-flash {
+  0% {
+    box-shadow: 0 0 0 0 var(--color-beam-wash);
+  }
+  40% {
+    box-shadow: 0 0 0 6px var(--color-beam-wash);
+  }
+  100% {
+    box-shadow: 0 0 0 0 transparent;
+  }
+}
+
+.state-flash {
+  animation: netra-flash 700ms var(--ease-out) 1;
+}
+
+/* The segmented control's active pill travels instead of teleporting. */
+.segment-track {
+  position: relative;
+}
+
+.segment-indicator {
+  position: absolute;
+  top: 2px;
+  bottom: 2px;
+  border-radius: var(--radius-full);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-xs);
+  transition:
+    transform 320ms var(--ease-out),
+    width 320ms var(--ease-out);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card-interactive:hover {
+    transform: none;
+  }
+  .segment-indicator,
+  .btn-arrow,
+  .link-underline::after {
+    transition: none;
+  }
+}

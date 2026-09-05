@@ -73,9 +73,13 @@ export function StressTestPanel({
         </div>
       </div>
 
-      <p className="font-mono text-hud text-ink-faint">
-        Pass bars — mean ≤ {THRESHOLDS.meanMrad} mrad · peak ≤ {THRESHOLDS.maxMrad} mrad · lock ≥{' '}
-        {THRESHOLDS.lockRetention}%
+      <p className="text-caption text-ink-muted">
+        Pass bars, identical for every phase — mean ≤{' '}
+        <span className="font-mono text-ink">{THRESHOLDS.meanMrad} mrad</span> and peak ≤{' '}
+        <span className="font-mono text-ink">{THRESHOLDS.maxMrad} mrad</span> measured{' '}
+        <em>while locked</em>, and lock retention ≥{' '}
+        <span className="font-mono text-ink">{THRESHOLDS.lockRetention}%</span> across the whole
+        phase. No phase gets an easier bar.
       </p>
 
       {report ? (
@@ -106,7 +110,7 @@ export function StressTestPanel({
             <table className="w-full min-w-[560px] border-collapse">
               <thead>
                 <tr className="border-b border-rule text-left">
-                  {['Phase', 'Mean', 'Peak', 'Lock', 'Result'].map((h) => (
+                  {['Phase', 'Mean (locked)', 'Peak (locked)', 'Retention', 'Result'].map((h) => (
                     <th key={h} className="pb-8">
                       <Label>{h}</Label>
                     </th>

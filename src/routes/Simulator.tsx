@@ -4,6 +4,7 @@ import { EventLog } from '../components/simulator/EventLog'
 import { MetricGrid } from '../components/simulator/MetricGrid'
 import { DisturbancePanel } from '../components/simulator/DisturbancePanel'
 import { StressTestPanel } from '../components/simulator/StressTestPanel'
+import { RecoverySequence } from '../components/simulator/RecoverySequence'
 import { ErrorChart, GimbalChart, LockChart, PredictionChart } from '../components/simulator/Charts'
 import {
   Badge,
@@ -54,7 +55,7 @@ export function Simulator() {
     [base, overrides, running],
   )
 
-  const { state, telemetry, log, history, snapshotRef, reset } = useTracker(params)
+  const { state, telemetry, log, history, recovery, snapshotRef, reset } = useTracker(params)
 
   // The stress test reads the loop through a ref so its timer never sees a
   // stale render.
@@ -260,6 +261,10 @@ export function Simulator() {
 
           <Card className="p-20">
             <MetricGrid telemetry={telemetry} />
+          </Card>
+
+          <Card className="p-20">
+            <RecoverySequence recovery={recovery} />
           </Card>
         </section>
 

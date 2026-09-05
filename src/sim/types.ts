@@ -36,3 +36,16 @@ export type Telemetry = {
   reacquisitionS: number
   candidates: number
 }
+
+/**
+ * Where the loop is in a loss-and-recovery cycle, and how long each step took.
+ * Driven by the state machine itself rather than described alongside it.
+ */
+export type Recovery = {
+  /** 0 tracking · 1 lost · 2 searching · 3 detected · 4 re-acquired */
+  stage: number
+  /** Seconds spent reaching each stage, from the moment the target was lost. */
+  timings: Array<number | null>
+  /** Completed loss-to-lock cycles this run. */
+  cycles: number
+}

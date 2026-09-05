@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from 'react'
 import type { TrackState } from '../../sim/types'
 import { cx } from '../../lib/cx'
 
@@ -37,13 +38,26 @@ const TONE: Record<TrackState, { dot: string; text: string; wash: string; pulse:
 
 export function StatusChip({ state, className }: { state: TrackState; className?: string }) {
   const tone = TONE[state]
+  const [flash, setFlash] = useState(0)
+  const previous = useRef(state)
+
+  useEffect(() => {
+    if (previous.current !== state) {
+      previous.current = state
+      setFlash((n) => n + 1)
+    }
+  }, [state])
+
   return (
     <span
+      key={flash}
       role="status"
       aria-live="polite"
       className={cx(
         'inline-flex items-center gap-8 rounded-full border px-12 py-4',
         'text-label font-medium uppercase tracking-label shadow-xs',
+        'transition-colors duration-300 ease-out',
+        flash > 0 && 'state-flash',
         tone.wash,
         tone.text,
         className,

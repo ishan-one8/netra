@@ -108,7 +108,7 @@ export function Marketing() {
 
           <Reveal delay={280}>
             <div className="flex flex-wrap items-center justify-center gap-12">
-              <Button to="/simulator" size="lg">
+              <Button to="/simulator" size="lg" arrow>
                 Open the simulator
               </Button>
               <Button href="#problem" variant="secondary" size="lg">
@@ -163,7 +163,7 @@ export function Marketing() {
         <div className="grid gap-16 md:grid-cols-3">
           {PROBLEM.map((item, i) => (
             <Reveal key={item.title} delay={i * 100}>
-              <Card className="flex h-full flex-col gap-12 p-24">
+              <Card interactive className="flex h-full flex-col gap-12 p-24">
                 <h3 className="text-title font-medium text-ink">{item.title}</h3>
                 <p className="text-small text-ink-muted">{item.body}</p>
               </Card>
@@ -184,7 +184,7 @@ export function Marketing() {
         <div className="grid gap-16 lg:grid-cols-3">
           {SYSTEM.map((item, i) => (
             <Reveal key={item.title} delay={i * 100}>
-              <div className="flex h-full flex-col gap-16 rounded-lg bg-paper p-24">
+              <div className="card-interactive flex h-full flex-col gap-16 rounded-lg border border-transparent bg-paper p-24">
                 <Badge>{item.badge}</Badge>
                 <h3 className="text-title font-medium text-ink">{item.title}</h3>
                 <p className="text-small text-ink-muted">{item.body}</p>
@@ -203,7 +203,7 @@ export function Marketing() {
                 in unlimited quantity.
               </p>
             </div>
-            <Button to="/simulator" variant="secondary">
+            <Button to="/simulator" variant="secondary" arrow>
               See it running
             </Button>
           </div>
@@ -236,21 +236,21 @@ export function Marketing() {
           />
           <Reveal delay={120}>
             <p className="max-w-[46ch] text-body-lg text-ink-muted">
-              Thresholds are published before the run, not chosen after it. The console drives the
-              same loop through fast targets, vibration, noise, turbulence, dropout and decoys —
-              then scores each phase and returns pass or fail.
+              Thresholds are published before the run, not chosen after it, and every phase is
+              graded on the same two questions: when the loop says it is locked, how well does it
+              point — and how much of the phase does it stay locked? No phase gets an easier bar.
             </p>
           </Reveal>
         </div>
 
         <div className="grid gap-16 md:grid-cols-3">
           {[
-            ['Mean pointing error', '≤ 14 mrad', 'averaged across each phase, settling time excluded'],
-            ['Peak pointing error', '≤ 60 mrad', 'the worst single sample in the phase'],
-            ['Lock retention', '≥ 65%', 'share of the phase spent inside the lock window'],
+            ['Mean pointing error', '≤ 14 mrad', 'measured while the loop reports lock'],
+            ['Peak pointing error', '≤ 60 mrad', 'worst single sample while locked'],
+            ['Lock retention', '≥ 60%', 'share of the whole phase spent locked'],
           ].map(([label, value, note], i) => (
             <Reveal key={label} delay={i * 100}>
-              <div className="flex h-full flex-col gap-8 rounded-lg bg-paper p-24">
+              <div className="card-interactive flex h-full flex-col gap-8 rounded-lg border border-transparent bg-paper p-24">
                 <Label>{label}</Label>
                 <span className="font-mono text-heading-sm font-medium text-ink">{value}</span>
                 <p className="text-caption text-ink-muted">{note}</p>
@@ -261,7 +261,9 @@ export function Marketing() {
 
         <Reveal delay={220}>
           <div className="flex flex-wrap items-center gap-12">
-            <Button to="/simulator">Run the stress test</Button>
+            <Button to="/simulator" arrow>
+              Run the stress test
+            </Button>
             <span className="text-caption text-ink-faint">Takes about 50 seconds in the browser.</span>
           </div>
         </Reveal>
@@ -390,7 +392,7 @@ export function Marketing() {
             </Reveal>
             <Reveal delay={200}>
               <div className="flex flex-wrap gap-12">
-                <Button to="/simulator" size="lg">
+                <Button to="/simulator" size="lg" arrow>
                   Open the simulator
                 </Button>
               </div>

@@ -21,7 +21,7 @@ export function Applications() {
   return (
     <div className="grid gap-12 sm:grid-cols-2">
       {USES.map((u) => (
-        <div key={u.name} className="flex flex-col gap-8 rounded-md border border-rule bg-surface p-20">
+        <div key={u.name} className="card-interactive flex flex-col gap-8 rounded-md border border-rule bg-surface p-20">
           <h3 className="text-title font-medium text-ink">{u.name}</h3>
           <p className="text-small text-ink-muted">{u.detail}</p>
         </div>

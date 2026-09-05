@@ -10,7 +10,10 @@ type Props<T extends string> = {
   className?: string
 }
 
-/** A recessed track; the active option is the one lifted onto white. */
+/**
+ * A recessed track with one lifted pill. The pill travels to the option you
+ * pick rather than appearing there.
+ */
 export function SegmentedControl<T extends string>({
   options,
   value,
@@ -18,12 +21,27 @@ export function SegmentedControl<T extends string>({
   label,
   className,
 }: Props<T>) {
+  const index = Math.max(
+    0,
+    options.findIndex((o) => o.value === value),
+  )
+  const width = 100 / options.length
+
   return (
     <div
       role="radiogroup"
       aria-label={label}
-      className={cx('flex gap-2 rounded-full border border-rule bg-paper p-2', className)}
+      className={cx('segment-track flex gap-2 rounded-full border border-rule bg-paper p-2', className)}
     >
+      <span
+        aria-hidden
+        className="segment-indicator"
+        style={{
+          width: `calc(${width}% - 4px)`,
+          transform: `translateX(calc(${index * 100}% + ${index * 4}px + 2px))`,
+          left: 0,
+        }}
+      />
       {options.map((option) => {
         const active = option.value === value
         return (
@@ -34,11 +52,9 @@ export function SegmentedControl<T extends string>({
             aria-checked={active}
             onClick={() => onChange(option.value)}
             className={cx(
-              'inline-flex min-h-[40px] flex-1 items-center justify-center rounded-full px-12',
-              'text-caption font-medium transition-all duration-200 ease-out',
-              active
-                ? 'bg-surface text-ink shadow-xs'
-                : 'text-ink-muted hover:text-ink',
+              'relative z-[1] inline-flex min-h-[40px] flex-1 items-center justify-center rounded-full px-8',
+              'text-caption font-medium transition-colors duration-200 ease-out',
+              active ? 'text-ink' : 'text-ink-muted hover:text-ink',
             )}
           >
             {option.label}
