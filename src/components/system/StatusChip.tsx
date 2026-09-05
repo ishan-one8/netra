@@ -1,41 +1,32 @@
 import type { TrackState } from '../../sim/types'
+import { GlassBadge } from './GlassBadge'
 import { cx } from '../../lib/cx'
 
 const LABEL: Record<TrackState, string> = {
-  SEARCHING: 'SEARCHING',
-  ACQUIRED: 'ACQUIRED',
-  LOCKED: 'LOCKED',
-  TRACK_LOST: 'TRACK LOST',
-}
-
-const TONE: Record<TrackState, { dot: string; text: string }> = {
-  SEARCHING: { dot: 'bg-signal', text: 'text-signal' },
-  ACQUIRED: { dot: 'bg-bone', text: 'text-bone' },
-  LOCKED: { dot: 'bg-lock', text: 'text-lock' },
-  TRACK_LOST: { dot: 'bg-fault', text: 'text-fault' },
-}
-
-type Props = {
-  state: TrackState
-  className?: string
+  SEARCHING: 'Searching',
+  ACQUIRED: 'Acquired',
+  LOCKED: 'Locked',
+  TRACK_LOST: 'Track lost',
 }
 
 /**
- * Sits outside the viewport, in the void. A dot and a word — no pill, no
- * border, no banner.
+ * The system carries no chromatic colour, so state is told by tone and form
+ * rather than hue: cream reads as lamplight on a live link, white as a held
+ * candidate, smoke as still looking, and a hollow ring as nothing there.
  */
-export function StatusChip({ state, className }: Props) {
-  const tone = TONE[state]
+const DOT: Record<TrackState, 'cream' | 'white' | 'smoke' | 'hollow'> = {
+  SEARCHING: 'smoke',
+  ACQUIRED: 'white',
+  LOCKED: 'cream',
+  TRACK_LOST: 'hollow',
+}
+
+export function StatusChip({ state, className }: { state: TrackState; className?: string }) {
   return (
-    <div
-      className={cx('inline-flex items-center gap-12', className)}
-      role="status"
-      aria-live="polite"
-    >
-      <span aria-hidden className={cx('size-[6px] rounded-full', tone.dot)} />
-      <span className={cx('font-mono text-telemetry uppercase tracking-label', tone.text)}>
+    <span role="status" aria-live="polite" className={cx('inline-flex', className)}>
+      <GlassBadge dot={DOT[state]} className={state === 'SEARCHING' ? 'netra-pulse' : undefined}>
         {LABEL[state]}
-      </span>
-    </div>
+      </GlassBadge>
+    </span>
   )
 }

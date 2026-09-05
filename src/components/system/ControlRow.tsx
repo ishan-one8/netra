@@ -14,10 +14,7 @@ type Props = {
   className?: string
 }
 
-/**
- * Label left in Switzer ash, live value right in mono bone, a 1px slider
- * beneath. No box around the group — the eyebrow above does that work.
- */
+/** Label left, live value right, a graphite track with a cream fill beneath. */
 export function ControlRow({
   label,
   value,
@@ -35,13 +32,13 @@ export function ControlRow({
 
   return (
     <div className={cx('flex flex-col', className)}>
-      <div className="flex items-baseline justify-between gap-12">
-        <label htmlFor={id} className="text-label font-regular tracking-label text-ash">
+      <div className="flex items-baseline justify-between gap-16">
+        <label htmlFor={id} className="text-body text-smoke">
           {label}
         </label>
-        <span className="font-mono text-telemetry text-bone">
+        <span className="tabular text-body text-pure-white">
           {value.toFixed(decimals)}
-          {unit ? <span className="text-ash">{unit}</span> : null}
+          {unit ? <span className="text-smoke">{unit}</span> : null}
         </span>
       </div>
       <input

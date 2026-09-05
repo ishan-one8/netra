@@ -12,8 +12,9 @@ type Props = {
 type Star = { x: number; y: number; r: number; a: number }
 
 /**
- * The one bordered surface in the product, and the only place light is emitted.
- * Everything inside is sensor imagery and overlay — outside it, the void.
+ * Treated as a cinematic media container: a 10px-radius full-bleed frame with
+ * overlays and glass chips floating on top. Elevation comes from the frame
+ * itself, never from a shadow.
  */
 export function CameraViewport({ snapshotRef, modeLabel, sceneLabel, frame }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -55,14 +56,12 @@ export function CameraViewport({ snapshotRef, modeLabel, sceneLabel, frame }: Pr
       const snap = snapshotRef.current
       if (!snap) return
 
-      const bone = token('bone')
-
+      const white = token('pure-white')
       ctx.clearRect(0, 0, width, height)
 
-      // --- Sensor scene ------------------------------------------------------
       for (const s of stars) {
         ctx.globalAlpha = s.a * (0.7 + 0.3 * Math.sin(t * 0.001 + s.x * 40))
-        ctx.fillStyle = bone
+        ctx.fillStyle = white
         ctx.beginPath()
         ctx.arc(s.x * width, s.y * height, s.r, 0, Math.PI * 2)
         ctx.fill()
@@ -72,46 +71,44 @@ export function CameraViewport({ snapshotRef, modeLabel, sceneLabel, frame }: Pr
       const bx = snap.truth.x * width
       const by = snap.truth.y * height
 
-      // The beacon itself — diegetic light, the sensor seeing a source.
+      // The beacon — the sensor seeing a source. Warm, like everything lit here.
       if (!snap.occluded) {
-        const glow = ctx.createRadialGradient(bx, by, 0, bx, by, 26)
-        glow.addColorStop(0, alpha('bone', 0.5))
-        glow.addColorStop(1, alpha('bone', 0))
+        const glow = ctx.createRadialGradient(bx, by, 0, bx, by, 28)
+        glow.addColorStop(0, alpha('lamp-cream', 0.45))
+        glow.addColorStop(1, alpha('lamp-cream', 0))
         ctx.fillStyle = glow
         ctx.beginPath()
-        ctx.arc(bx, by, 26, 0, Math.PI * 2)
+        ctx.arc(bx, by, 28, 0, Math.PI * 2)
         ctx.fill()
 
-        ctx.fillStyle = bone
+        ctx.fillStyle = token('lamp-cream')
         ctx.beginPath()
-        ctx.arc(bx, by, 2.2, 0, Math.PI * 2)
+        ctx.arc(bx, by, 2.4, 0, Math.PI * 2)
         ctx.fill()
       }
 
-      // --- Overlays ----------------------------------------------------------
       const dx = snap.detection.x * width
       const dy = snap.detection.y * height
 
       // Track trail.
-      ctx.strokeStyle = alpha('beam', 0.35)
+      ctx.strokeStyle = alpha('pure-white', 0.28)
       ctx.lineWidth = 1
       ctx.beginPath()
       snap.trail.forEach((point, i) => {
-        const px = point.x * width
-        const py = point.y * height
-        if (i === 0) ctx.moveTo(px, py)
-        else ctx.lineTo(px, py)
+        const tx = point.x * width
+        const ty = point.y * height
+        if (i === 0) ctx.moveTo(tx, ty)
+        else ctx.lineTo(tx, ty)
       })
       ctx.stroke()
 
-      // Detection bounding box.
+      // Detection box, with corner ticks.
       const box = snap.boxSize * Math.min(width, height)
-      ctx.strokeStyle = snap.occluded ? alpha('fault', 0.6) : alpha('beam', 0.85)
+      ctx.strokeStyle = snap.occluded ? token('graphite') : alpha('pure-white', 0.5)
       ctx.strokeRect(dx - box / 2, dy - box / 2, box, box)
 
-      // Corner ticks on the box read as instrumentation, not a card.
       const tick = Math.max(6, box * 0.16)
-      ctx.strokeStyle = snap.occluded ? alpha('fault', 0.9) : alpha('bone', 0.85)
+      ctx.strokeStyle = snap.occluded ? token('smoke') : token('lamp-cream')
       ctx.beginPath()
       for (const [cx, cy, sx, sy] of [
         [dx - box / 2, dy - box / 2, 1, 1],
@@ -125,8 +122,8 @@ export function CameraViewport({ snapshotRef, modeLabel, sceneLabel, frame }: Pr
       }
       ctx.stroke()
 
-      // Crosshair reticle across the full frame.
-      ctx.strokeStyle = alpha('bone', 0.18)
+      // Reticle.
+      ctx.strokeStyle = alpha('pure-white', 0.14)
       ctx.beginPath()
       ctx.moveTo(dx, 0)
       ctx.lineTo(dx, dy - box / 2 - 8)
@@ -139,21 +136,21 @@ export function CameraViewport({ snapshotRef, modeLabel, sceneLabel, frame }: Pr
       ctx.stroke()
 
       // Kalman prediction ghost.
-      const px = snap.prediction.x * width
-      const py = snap.prediction.y * height
+      const gx = snap.prediction.x * width
+      const gy = snap.prediction.y * height
       ctx.setLineDash([3, 5])
-      ctx.strokeStyle = alpha('beam', 0.5)
-      ctx.strokeRect(px - box / 2, py - box / 2, box, box)
+      ctx.strokeStyle = alpha('smoke', 0.7)
+      ctx.strokeRect(gx - box / 2, gy - box / 2, box, box)
       ctx.beginPath()
       ctx.moveTo(dx, dy)
-      ctx.lineTo(px, py)
+      ctx.lineTo(gx, gy)
       ctx.stroke()
       ctx.setLineDash([])
 
-      // --- Edge rulers -------------------------------------------------------
-      ctx.font = '11px "JetBrains Mono", ui-monospace, monospace'
-      ctx.fillStyle = alpha('bone', 0.45)
-      ctx.strokeStyle = alpha('bone', 0.2)
+      // Edge rulers.
+      ctx.font = '11px Satoshi, Inter, ui-sans-serif, sans-serif'
+      ctx.fillStyle = alpha('pure-white', 0.4)
+      ctx.strokeStyle = alpha('pure-white', 0.18)
 
       ctx.beginPath()
       for (let i = 0; i <= 12; i += 1) {
@@ -161,20 +158,14 @@ export function CameraViewport({ snapshotRef, modeLabel, sceneLabel, frame }: Pr
         const major = i % 3 === 0
         ctx.moveTo(x, height)
         ctx.lineTo(x, height - (major ? 9 : 4))
-        if (major) {
-          const az = ((i / 12) - 0.5) * 24
-          ctx.fillText(az.toFixed(0), x + 4, height - 12)
-        }
+        if (major) ctx.fillText((((i / 12) - 0.5) * 24).toFixed(0), x + 4, height - 12)
       }
       for (let i = 0; i <= 8; i += 1) {
         const y = (i / 8) * height
         const major = i % 2 === 0
         ctx.moveTo(0, y)
         ctx.lineTo(major ? 9 : 4, y)
-        if (major) {
-          const el = 42 + (0.5 - i / 8) * 16
-          ctx.fillText(el.toFixed(0), 13, y + 4)
-        }
+        if (major) ctx.fillText((42 + (0.5 - i / 8) * 16).toFixed(0), 13, y + 4)
       }
       ctx.stroke()
     }
@@ -192,17 +183,19 @@ export function CameraViewport({ snapshotRef, modeLabel, sceneLabel, frame }: Pr
   }, [snapshotRef])
 
   return (
-    <div className="relative aspect-video w-full rounded-lg border border-viewport-edge">
-      <canvas ref={canvasRef} className="block size-full rounded-lg" />
+    <div className="relative aspect-video w-full overflow-hidden rounded-card bg-void-black">
+      <canvas ref={canvasRef} className="block size-full" />
 
-      <div className="pointer-events-none absolute inset-0 p-18 font-mono text-hud text-bone">
-        <div className="flex items-start justify-between">
-          <span className="opacity-70">NETRA · EO-TRACK</span>
-          <span className="opacity-70">FRAME {String(frame).padStart(6, '0')}</span>
+      <div className="pointer-events-none absolute inset-0 flex flex-col justify-between p-16">
+        <div className="flex items-start justify-between gap-16">
+          <span className="text-label-sm font-medium uppercase text-smoke">Netra · EO-Track</span>
+          <span className="tabular text-label-sm font-medium uppercase text-smoke">
+            Frame {String(frame).padStart(6, '0')}
+          </span>
         </div>
-        <div className="absolute right-18 bottom-18 left-18 flex items-end justify-between">
-          <span className="opacity-70">{sceneLabel.toUpperCase()}</span>
-          <span className="opacity-70">{modeLabel.toUpperCase()}</span>
+        <div className="flex items-end justify-between gap-16">
+          <span className="text-label-sm font-medium uppercase text-smoke">{sceneLabel}</span>
+          <span className="text-label-sm font-medium uppercase text-smoke">{modeLabel}</span>
         </div>
       </div>
     </div>

@@ -11,8 +11,8 @@ type Props<T extends string> = {
 }
 
 /**
- * A row of text options 24px apart. Ash inactive, bone active with a 1px beam
- * underline. No pill, no container.
+ * A row of pills. The active one takes the ghost outline; cream stays reserved
+ * for the single primary action on the page.
  */
 export function SegmentedControl<T extends string>({
   options,
@@ -22,11 +22,7 @@ export function SegmentedControl<T extends string>({
   className,
 }: Props<T>) {
   return (
-    <div
-      role="radiogroup"
-      aria-label={label}
-      className={cx('flex flex-wrap items-center gap-24', className)}
-    >
+    <div role="radiogroup" aria-label={label} className={cx('flex flex-wrap gap-8', className)}>
       {options.map((option) => {
         const active = option.value === value
         return (
@@ -37,8 +33,11 @@ export function SegmentedControl<T extends string>({
             aria-checked={active}
             onClick={() => onChange(option.value)}
             className={cx(
-              'inline-flex min-h-[44px] items-center border-b text-label font-regular tracking-label transition-colors duration-200',
-              active ? 'border-beam text-bone' : 'border-transparent text-ash hover:text-bone',
+              'inline-flex min-h-[44px] items-center rounded-full border px-20 text-body',
+              'font-medium transition-colors duration-[250ms] ease-sequel',
+              active
+                ? 'border-pure-white text-pure-white'
+                : 'border-transparent text-smoke hover:text-pure-white',
             )}
           >
             {option.label}

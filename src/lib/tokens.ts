@@ -1,19 +1,14 @@
 /**
- * Canvas needs colour as strings, not classes. Rather than hardcode hex in a
- * component, read the same custom properties the rest of the system uses.
+ * Canvas needs colour as strings, not classes. Rather than hardcode a value in
+ * a component, read the same custom properties the rest of the system uses.
  */
 export type TokenName =
-  | 'void'
-  | 'bone'
-  | 'ash'
-  | 'silver'
-  | 'beam'
-  | 'signal'
-  | 'lock'
-  | 'fault'
-  | 'aqua'
-  | 'hairline'
-  | 'viewport-edge'
+  | 'void-black'
+  | 'pure-white'
+  | 'charcoal'
+  | 'graphite'
+  | 'lamp-cream'
+  | 'smoke'
 
 const cache = new Map<TokenName, string>()
 
@@ -28,7 +23,7 @@ export function token(name: TokenName): string {
   return value
 }
 
-/** `rgba()` over a token, for overlay work where partial opacity is the rule. */
+/** `rgba()` over a token, for overlay work drawn at partial opacity. */
 export function alpha(name: TokenName, a: number): string {
   const value = token(name)
   if (value.startsWith('#') && value.length === 7) {

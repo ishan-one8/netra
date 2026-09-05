@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { EyebrowLabel } from './EyebrowLabel'
+import { Label } from './Label'
 import { cx } from '../../lib/cx'
 import { prefersReducedMotion } from '../../lib/motion'
 
@@ -8,16 +8,15 @@ type Props = {
   value: number
   unit?: string
   decimals?: number
-  size?: 'md' | 'xl'
-  /** 0–1. Draws a 1px bar beneath, filling outward from centre. */
-  error?: number
-  errorTone?: 'beam' | 'signal' | 'fault' | 'lock'
+  size?: 'md' | 'lg'
+  /** 0–1. Draws a 2px bar beneath the value. */
+  meter?: number
   className?: string
 }
 
 const DURATION = 300
 
-/** Counts to a new value over 300ms so a readout never snaps. */
+/** Counts to a new value so a readout never snaps. */
 function useCountUp(value: number) {
   const [shown, setShown] = useState(value)
   const from = useRef(value)
@@ -39,23 +38,16 @@ function useCountUp(value: number) {
 
     frame.current = requestAnimationFrame(step)
     return () => cancelAnimationFrame(frame.current)
-    // `shown` is read as the animation origin only; following it would restart the tween.
+    // `shown` is the animation origin only; following it would restart the tween.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value])
 
   return prefersReducedMotion ? value : shown
 }
 
-const ERROR_TONE = {
-  beam: 'bg-beam',
-  signal: 'bg-signal',
-  fault: 'bg-fault',
-  lock: 'bg-lock',
-} as const
-
 /**
- * Amber eyebrow, mono value, ash unit. Optionally a 1px error bar filling
- * outward from centre.
+ * Tracked uppercase label, hairline-weight number, quiet unit. Figures are
+ * tabular so the value cannot shift width as it updates.
  */
 export function TelemetryReadout({
   label,
@@ -63,34 +55,30 @@ export function TelemetryReadout({
   unit,
   decimals = 2,
   size = 'md',
-  error,
-  errorTone = 'beam',
+  meter,
   className,
 }: Props) {
   const shown = useCountUp(value)
 
   return (
-    <div className={cx('flex flex-col gap-6', className)}>
-      <EyebrowLabel>{label}</EyebrowLabel>
-      <div className="flex items-baseline gap-6">
+    <div className={cx('flex flex-col gap-8', className)}>
+      <Label>{label}</Label>
+      <div className="flex items-baseline gap-8">
         <span
           className={cx(
-            'font-mono text-bone',
-            size === 'xl' ? 'text-readout-xl font-medium' : 'text-readout',
+            'tabular font-light text-pure-white',
+            size === 'lg' ? 'text-heading' : 'text-subheading',
           )}
         >
           {shown.toFixed(decimals)}
         </span>
-        {unit ? <span className="font-mono text-log text-ash">{unit}</span> : null}
+        {unit ? <span className="text-body text-smoke">{unit}</span> : null}
       </div>
-      {error === undefined ? null : (
-        <span aria-hidden className="relative mt-6 block h-px w-full bg-hairline">
+      {meter === undefined ? null : (
+        <span aria-hidden className="mt-4 block h-[2px] w-full rounded-full bg-graphite">
           <span
-            className={cx(
-              'absolute top-0 left-1/2 h-px -translate-x-1/2 transition-[width] duration-300',
-              ERROR_TONE[errorTone],
-            )}
-            style={{ width: `${Math.min(100, Math.max(0, error * 100))}%` }}
+            className="block h-[2px] rounded-full bg-lamp-cream transition-[width] duration-[300ms] ease-sequel"
+            style={{ width: `${Math.min(100, Math.max(0, meter * 100))}%` }}
           />
         </span>
       )}

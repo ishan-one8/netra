@@ -3,23 +3,18 @@ import { cx } from '../../lib/cx'
 
 type Props = {
   children: React.ReactNode
-  /** Internal route. */
   to?: string
-  /** External destination. */
   href?: string
   active?: boolean
   onClick?: () => void
   className?: string
 }
 
-/**
- * No background, no border. Bone when active, ash when not. Every secondary
- * navigation item and inline action in the product.
- */
+/** Plain navigation text. No underline, no border, no background. */
 export function GhostLink({ children, to, href, active = false, onClick, className }: Props) {
   const classes = cx(
-    'inline-flex min-h-[44px] items-center text-label font-regular tracking-label transition-colors duration-200',
-    active ? 'text-bone' : 'text-ash hover:text-bone',
+    'inline-flex min-h-[44px] items-center text-nav font-medium transition-colors duration-[250ms] ease-sequel',
+    active ? 'text-pure-white' : 'text-smoke hover:text-pure-white',
     className,
   )
 

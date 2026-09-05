@@ -1,137 +1,154 @@
-/* NETRA — theme layer.
-   Every colour, size, weight, space and radius in the product is declared here.
-   Components consume these as Tailwind utilities; no component carries a raw value. */
+/* NETRA, in the Sequel visual language.
+   Strictly achromatic: pure black, warm cream, three neutral greys. Every
+   colour, size, weight, space, radius and shadow in the product is declared
+   here — components carry no raw values. */
 
 @theme {
   /* ---- Colour ------------------------------------------------------------
-     The default Tailwind palette is removed on purpose: if a colour is not in
-     the design system, no utility exists for it. */
+     The default palette is removed on purpose. The system is 0% colorfulness
+     by design, so no utility exists for a chromatic value. */
   --color-*: initial;
   --color-transparent: transparent;
   --color-current: currentColor;
 
-  --color-void: #000000;
-  --color-bone: #ffffff;
-  --color-ash: #9a9a9a;
-  --color-silver: #bdbdbd;
-  --color-beam: #6c4bff;
-  --color-signal: #ffb829;
-  --color-lock: #3ddc97;
-  --color-fault: #ff4d4d;
-  --color-aqua: #0e7c86;
-  --color-hairline: rgba(255, 255, 255, 0.08);
-  --color-viewport-edge: rgba(255, 255, 255, 0.14);
+  --color-void-black: #000000;
+  --color-pure-white: #ffffff;
+  --color-charcoal: #202020;
+  --color-graphite: #333333;
+  --color-lamp-cream: #f5f5f0;
+  --color-smoke: #999999;
 
-  /* ---- Type faces -------------------------------------------------------- */
-  --font-display: 'Switzer', 'Inter', ui-sans-serif, system-ui, sans-serif;
-  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
-  --font-mono--font-feature-settings: 'tnum' 1;
+  /* Glass is a surface treatment, not a palette entry. */
+  --color-glass: rgba(200, 200, 200, 0.1);
+  --color-glass-edge: rgba(255, 255, 255, 0.08);
 
-  /* ---- Type scale --------------------------------------------------------
-     Sizes, line-heights and tracking travel together so a role cannot be
-     half-applied. */
+  /* ---- Type faces --------------------------------------------------------
+     Satoshi stands in for VisueltPro; Instrument Serif for Bradford. */
+  --font-visuelt: 'Satoshi', 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-visuelt--font-feature-settings: 'ss01' on, 'cv11' on;
+  --font-bradford: 'Instrument Serif', 'Canela', Georgia, serif;
+
+  /* ---- Type scale -------------------------------------------------------- */
   --text-*: initial;
 
-  --text-caption: 12px;
+  --text-caption: 10px;
   --text-caption--line-height: 1.5;
+  --text-caption--letter-spacing: 0.08em;
 
-  --text-label: 14px;
-  --text-label--line-height: 1.2;
-  --text-label--letter-spacing: 0.35px;
+  --text-label-sm: 11px;
+  --text-label-sm--line-height: 1.5;
+  --text-label-sm--letter-spacing: 0.05em;
 
-  --text-body: 18px;
+  --text-label: 12px;
+  --text-label--line-height: 1.5;
+  --text-label--letter-spacing: 0.05em;
+
+  --text-small: 13px;
+  --text-small--line-height: 1.5;
+  --text-small--letter-spacing: 0.03em;
+
+  --text-meta: 14px;
+  --text-meta--line-height: 1.5;
+
+  --text-nav: 15px;
+  --text-nav--line-height: 1.5;
+
+  --text-body: 16px;
   --text-body--line-height: 1.5;
 
-  --text-heading-2xs: 24px;
-  --text-heading-2xs--line-height: 1.25;
-  --text-heading-2xs--letter-spacing: -0.48px;
+  --text-body-md: 18px;
+  --text-body-md--line-height: 1.5;
 
-  --text-heading-xs: 27px;
-  --text-heading-xs--line-height: 1;
+  --text-body-lg: 20px;
+  --text-body-lg--line-height: 1.5;
 
-  --text-subheading: 36px;
+  --text-card: 21px;
+  --text-card--line-height: 1.3;
+
+  --text-subheading: 30px;
   --text-subheading--line-height: 1.2;
+  --text-subheading--letter-spacing: -0.025em;
 
-  --text-heading-sm: 42px;
-  --text-heading-sm--line-height: 1.2;
-  --text-heading-sm--letter-spacing: -1.68px;
+  --text-serif-sm: 32px;
+  --text-serif-sm--line-height: 1.2;
+  --text-serif-sm--letter-spacing: -0.025em;
 
-  --text-heading: 48px;
-  --text-heading--line-height: 1.1;
-  --text-heading--letter-spacing: -1.68px;
+  /* The table gives 54px no tracking; -0.05em starts at 57px. */
+  --text-heading: 54px;
+  --text-heading--line-height: 1.2;
 
-  --text-heading-lg: 78px;
-  --text-heading-lg--line-height: 1.1;
-  --text-heading-lg--letter-spacing: -3.12px;
+  --text-heading-lg: 57px;
+  --text-heading-lg--line-height: 1;
+  --text-heading-lg--letter-spacing: -2.85px;
 
-  --text-display: 113px;
-  --text-display--line-height: 1.1;
-  --text-display--letter-spacing: -4.52px;
+  --text-display-sm: 115px;
+  --text-display-sm--line-height: 1;
+  --text-display-sm--letter-spacing: -0.025em;
 
-  --text-readout-xl: 56px;
-  --text-readout-xl--line-height: 1;
-  --text-readout-xl--letter-spacing: -0.02em;
-
-  --text-readout: 32px;
-  --text-readout--line-height: 1;
-
-  --text-telemetry: 15px;
-  --text-telemetry--line-height: 1.4;
-
-  --text-log: 13px;
-  --text-log--line-height: 1.6;
-
-  --text-hud: 11px;
-  --text-hud--line-height: 1.4;
+  --text-display: 128px;
+  --text-display--line-height: 1;
+  --text-display--letter-spacing: -3.2px;
 
   /* ---- Weight ------------------------------------------------------------
-     Three weights exist. Bold does not. */
+     Three weights. Nothing above 500, nothing below 300. */
   --font-weight-*: initial;
-  --font-weight-extralight: 200;
+  --font-weight-light: 300;
   --font-weight-regular: 400;
-  --font-weight-medium: 500; /* mono only — the primary lock readout */
-  --font-weight-semibold: 600;
+  --font-weight-medium: 500;
 
   /* ---- Tracking ---------------------------------------------------------- */
   --tracking-*: initial;
-  --tracking-display: -0.04em;
-  --tracking-label: 0.025em;
-  --tracking-eyebrow: 0.14em;
+  --tracking-caption: 0.08em;
+  --tracking-label: 0.05em;
+  --tracking-small: 0.03em;
+  --tracking-subheading: -0.025em;
+  --tracking-display: -0.05em;
 
   /* ---- Space -------------------------------------------------------------
-     Base unit 6px. The fluid default scale is disabled so intermediate values
+     Base unit 4px. The fluid default scale is disabled so intermediate values
      cannot be invented. */
   --spacing: initial;
   --spacing-0: 0px;
   --spacing-px: 1px;
-  --spacing-6: 6px;
+  --spacing-4: 4px;
+  --spacing-8: 8px;
   --spacing-12: 12px;
-  --spacing-18: 18px;
+  --spacing-16: 16px;
+  --spacing-20: 20px;
   --spacing-24: 24px;
-  --spacing-30: 30px;
-  --spacing-36: 36px;
-  --spacing-60: 60px;
+  --spacing-28: 28px;
+  --spacing-32: 32px;
+  --spacing-40: 40px;
+  --spacing-64: 64px;
+  --spacing-80: 80px;
   --spacing-96: 96px;
   --spacing-120: 120px;
 
   /* ---- Shape -------------------------------------------------------------
-     24px for buttons, viewport and grouped regions. Pills for tags. Zero for
-     rules and chart elements. */
+     Pills for buttons, badges and chips. 10px for cards and image containers.
+     0px for inputs. Nothing else. */
   --radius-*: initial;
   --radius-none: 0px;
-  --radius-lg: 24px;
+  --radius-card: 10px;
   --radius-full: 9999px;
 
   /* ---- Elevation ---------------------------------------------------------
-     None. Removing the tokens removes the utilities. */
+     Two shadows exist, both functional: the cream button lifting off the void,
+     and the rim-lit edge that makes a glass badge read as glass. Nothing else
+     in the system casts one. */
   --shadow-*: initial;
   --inset-shadow-*: initial;
   --drop-shadow-*: initial;
   --text-shadow-*: initial;
 
-  /* ---- Layout ------------------------------------------------------------ */
-  --container-page: 1280px;
+  --shadow-lg: rgba(0, 0, 0, 0.15) 0px 4px 20px 0px;
+  --shadow-xl: rgba(0, 0, 0, 0.35) 0px 10px 30px 0px,
+    rgba(255, 255, 255, 0.08) 0px 1px 0px 0px inset;
 
-  /* ---- Motion ------------------------------------------------------------ */
-  --ease-signal: cubic-bezier(0.22, 1, 0.36, 1);
+  /* ---- Layout ------------------------------------------------------------ */
+  --container-page: 1200px;
+
+  /* ---- Motion ------------------------------------------------------------
+     A slow-out curve. Weighted, not snappy — a slow zoom on a film still. */
+  --ease-sequel: cubic-bezier(0.625, 0.05, 0, 1);
 }

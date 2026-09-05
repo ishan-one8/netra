@@ -1,47 +1,36 @@
-import { EyebrowLabel } from '../system'
+import { Label, Reveal } from '../system'
 import { cx } from '../../lib/cx'
 
 type Props = {
   id?: string
-  eyebrow: string
+  label?: string
   children: React.ReactNode
-  /** The second column. Marketing sections alternate which side it lands on. */
-  aside?: React.ReactNode
-  flip?: boolean
+  /** Charcoal turns the whole section into an elevated surface. */
+  surface?: 'void' | 'charcoal'
   className?: string
 }
 
 /**
- * The marketing rhythm: full-bleed on void, content bounded to the page width,
- * two asymmetric columns that alternate side to side, 60–120px apart. Structure
- * comes from the eyebrow and its hairline, never from a panel.
+ * Full-bleed on the canvas, content bounded to 1200px, 96–120px of vertical
+ * breathing room. Sections alternate between the void and a charcoal surface.
  */
-export function Section({ id, eyebrow, children, aside, flip = false, className }: Props) {
+export function Section({ id, label, children, surface = 'void', className }: Props) {
   return (
-    <section id={id} className={cx('w-full py-60 lg:py-96', className)}>
-      <div className="page">
-        <EyebrowLabel rule className="mb-36">
-          {eyebrow}
-        </EyebrowLabel>
-
-        <div
-          className={cx(
-            'grid gap-36 lg:gap-60',
-            aside ? 'lg:grid-cols-12' : 'lg:grid-cols-1',
-          )}
-        >
-          <div
-            className={cx(
-              aside && 'lg:col-span-7',
-              aside && flip && 'lg:order-2 lg:col-start-6',
-            )}
-          >
-            {children}
-          </div>
-          {aside ? (
-            <div className={cx('lg:col-span-5', flip && 'lg:order-1 lg:col-start-1')}>{aside}</div>
-          ) : null}
-        </div>
+    <section
+      id={id}
+      className={cx(
+        'w-full py-96 lg:py-120',
+        surface === 'charcoal' && 'bg-charcoal',
+        className,
+      )}
+    >
+      <div className="page flex flex-col gap-40">
+        {label ? (
+          <Reveal>
+            <Label rule>{label}</Label>
+          </Reveal>
+        ) : null}
+        {children}
       </div>
     </section>
   )

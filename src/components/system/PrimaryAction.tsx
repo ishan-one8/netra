@@ -11,13 +11,13 @@ type Props = {
 }
 
 const base =
-  'inline-flex min-h-[44px] items-center justify-center rounded-lg bg-beam px-[22px] py-[14px] ' +
-  'text-label font-semibold uppercase tracking-label text-bone transition-opacity duration-200 ' +
-  'hover:opacity-80 disabled:opacity-40'
+  'inline-flex min-h-[44px] items-center justify-center rounded-full bg-lamp-cream px-24 ' +
+  'text-body font-medium text-void-black shadow-lg transition-opacity duration-[250ms] ' +
+  'ease-sequel hover:opacity-90 disabled:opacity-40'
 
 /**
- * The one filled surface outside the viewport. One per view — two filled
- * buttons never sit near each other.
+ * The only filled surface in the system. Warm cream against pure black — the
+ * single accent, and the only place a drop shadow is allowed.
  */
 export function PrimaryAction({ children, to, href, onClick, disabled, className }: Props) {
   if (to) {

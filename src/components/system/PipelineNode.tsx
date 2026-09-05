@@ -4,7 +4,7 @@ type Props = {
   index: string
   name: string
   detail: string
-  /** Illumination means ash text becomes bone. Never a glow. */
+  /** Illumination is a tone change, never a glow. */
   lit: boolean
   className?: string
 }
@@ -14,28 +14,21 @@ export function PipelineNode({ index, name, detail, lit, className }: Props) {
     <div className={cx('flex flex-col gap-12', className)}>
       <span
         className={cx(
-          'font-mono text-hud tracking-eyebrow transition-colors duration-500',
-          lit ? 'text-signal' : 'text-ash',
+          'tabular text-label-sm font-medium uppercase transition-colors duration-[300ms] ease-sequel',
+          lit ? 'text-lamp-cream' : 'text-graphite',
         )}
       >
         {index}
       </span>
       <h3
         className={cx(
-          'text-heading-2xs font-regular transition-colors duration-500',
-          lit ? 'text-bone' : 'text-ash',
+          'text-card font-medium transition-colors duration-[300ms] ease-sequel',
+          lit ? 'text-pure-white' : 'text-smoke',
         )}
       >
         {name}
       </h3>
-      <p
-        className={cx(
-          'text-caption font-extralight transition-colors duration-500',
-          lit ? 'text-silver' : 'text-ash',
-        )}
-      >
-        {detail}
-      </p>
+      <p className="text-body text-smoke">{detail}</p>
     </div>
   )
 }

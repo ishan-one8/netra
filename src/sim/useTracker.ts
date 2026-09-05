@@ -284,12 +284,13 @@ export function useTracker(params: SimParams) {
     return () => cancelAnimationFrame(raf)
   }, [push, transition])
 
+  const seeded = useRef(false)
   useEffect(() => {
+    if (seeded.current) return
+    seeded.current = true
     push('info', 'NETRA ground segment online · simulation clock started')
     push('signal', 'Sweeping search volume for beacon return')
-    // Seeded once for the session.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [push])
 
   return { state, telemetry, log, history, snapshotRef, reset }
 }

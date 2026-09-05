@@ -9,28 +9,23 @@
 
   body {
     margin: 0;
-    background: var(--color-void);
-    color: var(--color-bone);
-    font-family: var(--font-display);
+    background: var(--color-void-black);
+    color: var(--color-pure-white);
+    font-family: var(--font-visuelt);
     font-size: var(--text-body);
-    font-weight: var(--font-weight-extralight);
+    font-weight: var(--font-weight-regular);
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
 
-  /* If the system measured it, it is mono — and it never changes width mid-update. */
-  .font-mono {
-    font-variant-numeric: tabular-nums;
-  }
-
   ::selection {
-    background: var(--color-beam);
-    color: var(--color-bone);
+    background: var(--color-lamp-cream);
+    color: var(--color-void-black);
   }
 
   :focus-visible {
-    outline: 1px solid var(--color-beam);
+    outline: 1px solid var(--color-lamp-cream);
     outline-offset: 3px;
   }
 
@@ -48,7 +43,7 @@
   }
 }
 
-/* Centred content column. Full-bleed sections sit on void; only the content is bounded. */
+/* Content column. Sections are full-bleed on the void; only the content is bounded. */
 @utility page {
   width: 100%;
   max-width: var(--container-page);
@@ -56,45 +51,104 @@
   padding-inline: var(--spacing-24);
 }
 
-/* The one state animation in the system: a 1px coloured line sweeps once
-   across the top of the column whose state changed. */
-@utility sweep-host {
-  position: relative;
+/* Frosted glass — the inner white edge is what makes it read as glass catching
+   imaginary light rather than a flat translucent chip. */
+@utility glass {
+  background: var(--color-glass);
+  backdrop-filter: blur(20px) saturate(1.4);
+  -webkit-backdrop-filter: blur(20px) saturate(1.4);
+  box-shadow: var(--shadow-xl);
 }
 
-@keyframes netra-sweep {
-  0% {
-    transform: scaleX(0);
-    transform-origin: left center;
+/* Readability layer under text that sits over the hero canvas. The only
+   gradient in the system. */
+@utility scrim {
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.55) 100%);
+}
+
+/* Numbers that update in place must not shift width while they do it. Sequel
+   has no monospace face, so the sans carries tabular figures instead. */
+@utility tabular {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1;
+}
+
+/* ---- Motion ---------------------------------------------------------------
+   Slow-out easing throughout. Opacity, transform, background and border only —
+   never hue, never spring, never bounce. */
+
+.netra-reveal {
+  opacity: 0;
+  transform: translateY(16px);
+  transition:
+    opacity 600ms var(--ease-sequel),
+    transform 600ms var(--ease-sequel);
+}
+
+.netra-reveal.is-in {
+  opacity: 1;
+  transform: none;
+}
+
+.netra-word {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(14px);
+  transition:
+    opacity 600ms var(--ease-sequel),
+    transform 600ms var(--ease-sequel);
+  white-space: pre;
+}
+
+.netra-word.is-in {
+  opacity: 1;
+  transform: none;
+}
+
+.netra-rule-draw {
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 900ms var(--ease-sequel);
+}
+
+.netra-rule-draw.is-in {
+  transform: scaleX(1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .netra-reveal,
+  .netra-word,
+  .netra-rule-draw {
     opacity: 1;
-  }
-  60% {
-    transform: scaleX(1);
-    transform-origin: left center;
-    opacity: 1;
-  }
-  61% {
-    transform: scaleX(1);
-    transform-origin: right center;
-  }
-  100% {
-    transform: scaleX(0);
-    transform-origin: right center;
-    opacity: 1;
+    transform: none;
   }
 }
 
-@keyframes netra-fade-in {
+/* The one long-duration motion in the system. */
+@keyframes netra-marquee {
   from {
-    opacity: 0;
+    transform: translateX(0);
   }
   to {
-    opacity: 1;
+    transform: translateX(-50%);
   }
 }
 
-/* Control slider — a 1px hairline track, a 1px violet fill, a 10px bone thumb.
-   The hit area is 44px tall on every viewport; only the paint is 1px. */
+.netra-marquee-track {
+  display: flex;
+  width: max-content;
+  animation: netra-marquee 45s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .netra-marquee-track {
+    animation: none;
+  }
+}
+
+/* ---- Controls -------------------------------------------------------------
+   A graphite track, a cream fill, a white thumb. The hit area is 44px on every
+   viewport; only the paint is thin. */
 .control-slider {
   -webkit-appearance: none;
   appearance: none;
@@ -106,41 +160,49 @@
 }
 
 .control-slider::-webkit-slider-runnable-track {
-  height: 1px;
+  height: 2px;
+  border-radius: var(--radius-full);
   background: linear-gradient(
     to right,
-    var(--color-beam) 0 var(--fill, 0%),
-    var(--color-hairline) var(--fill, 0%) 100%
+    var(--color-lamp-cream) 0 var(--fill, 0%),
+    var(--color-graphite) var(--fill, 0%) 100%
   );
 }
 
 .control-slider::-moz-range-track {
-  height: 1px;
-  background: var(--color-hairline);
+  height: 2px;
+  border-radius: var(--radius-full);
+  background: var(--color-graphite);
 }
 
 .control-slider::-moz-range-progress {
-  height: 1px;
-  background: var(--color-beam);
+  height: 2px;
+  border-radius: var(--radius-full);
+  background: var(--color-lamp-cream);
 }
 
 .control-slider::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 10px;
-  height: 10px;
+  width: 12px;
+  height: 12px;
   border-radius: var(--radius-full);
-  background: var(--color-bone);
+  background: var(--color-pure-white);
   border: none;
-  margin-top: -4.5px;
+  margin-top: -5px;
+  transition: transform 250ms var(--ease-sequel);
 }
 
 .control-slider::-moz-range-thumb {
-  width: 10px;
-  height: 10px;
+  width: 12px;
+  height: 12px;
   border-radius: var(--radius-full);
-  background: var(--color-bone);
+  background: var(--color-pure-white);
   border: none;
+}
+
+.control-slider:hover::-webkit-slider-thumb {
+  transform: scale(1.25);
 }
 
 .control-slider:disabled {
@@ -148,10 +210,9 @@
   opacity: 0.4;
 }
 
-/* The event log is the only high-density region, and it scrolls on its own axis. */
 .log-scroll {
   scrollbar-width: thin;
-  scrollbar-color: var(--color-hairline) transparent;
+  scrollbar-color: var(--color-graphite) transparent;
 }
 
 .log-scroll::-webkit-scrollbar {
@@ -159,12 +220,13 @@
 }
 
 .log-scroll::-webkit-scrollbar-thumb {
-  background: var(--color-hairline);
+  background: var(--color-graphite);
+  border-radius: var(--radius-full);
 }
 
-/* The simulator inverts the marketing rhythm: three columns, denser, still
-   panel-free. Regions are placed by name so each breakpoint states its own
-   reading order without duplicating markup. */
+/* ---- Simulator layout -----------------------------------------------------
+   Regions are placed by name so each breakpoint states its own reading order
+   without duplicating markup. */
 .sim-grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
@@ -173,7 +235,7 @@
     'telemetry'
     'controls'
     'log';
-  gap: var(--spacing-36);
+  gap: var(--spacing-24);
 }
 
 .sim-area-controls {
@@ -188,41 +250,51 @@
 .sim-area-log {
   grid-area: log;
 }
-.sim-rule-a {
-  grid-area: rule-a;
-}
-.sim-rule-b {
-  grid-area: rule-b;
-}
-
-.sim-rule-a,
-.sim-rule-b {
-  display: none;
-}
 
 @media (min-width: 1024px) {
   .sim-grid {
-    grid-template-columns: 260px 1px minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-columns: 300px minmax(0, 1fr) minmax(0, 1fr);
     grid-template-areas:
-      'controls rule-a main main'
-      'controls rule-a telemetry log';
+      'controls main main'
+      'controls telemetry log';
     align-items: start;
-  }
-
-  .sim-rule-a {
-    display: block;
   }
 }
 
 @media (min-width: 1280px) {
   .sim-grid {
-    grid-template-columns: 260px 1px minmax(0, 1fr) 1px 320px;
-    grid-template-areas:
-      'controls rule-a main rule-b telemetry'
-      'controls rule-a main rule-b log';
+    grid-template-columns: 300px minmax(0, 1fr) minmax(0, 1fr);
+    gap: var(--spacing-32);
   }
+}
 
-  .sim-rule-b {
-    display: block;
+/* A held breath on a chip that is still looking. Opacity only. */
+@keyframes netra-pulse {
+  0%,
+  100% {
+    opacity: 1;
   }
+  50% {
+    opacity: 0.55;
+  }
+}
+
+.netra-pulse {
+  animation: netra-pulse 2.4s var(--ease-sequel) infinite;
+}
+
+/* Route change fades rather than cuts. */
+@keyframes netra-route-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.netra-route-in {
+  animation: netra-route-in 400ms var(--ease-sequel) both;
 }
