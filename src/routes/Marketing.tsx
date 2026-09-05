@@ -109,7 +109,7 @@ export function Marketing() {
             as="h1"
             size="hero"
             gradient
-            text="Find the terminal. Hold it in frame."
+            text={"Find the terminal.\nHold it in frame."}
             accent="frame"
             className="max-w-[14ch]"
           />
@@ -166,7 +166,7 @@ export function Marketing() {
         <div className="flex flex-col gap-32 lg:flex-row lg:items-end lg:justify-between">
           <Heading
             size="lg"
-            text="Pointing, acquisition and tracking happens in two stages. The first is where links are lost."
+            text={"Pointing, acquisition and tracking\nhappens in two stages. The first\nis where links are lost."}
             accent="two"
             className="max-w-[20ch]"
           />
@@ -201,7 +201,7 @@ export function Marketing() {
                 <span className="font-mono text-hud font-medium text-beam">
                   {String(i + 1).padStart(2, '0')}
                 </span>
-                <h3 className="text-title font-medium text-ink">{item.title}</h3>
+                <h3 className="font-display text-title font-medium text-ink">{item.title}</h3>
                 <p className="text-small text-ink-muted">{item.body}</p>
               </Card>
             </Reveal>
@@ -213,17 +213,21 @@ export function Marketing() {
       <Section id="system" label="The system" glow="right">
         <Heading
           size="lg"
-          text="Three parts, one closed loop."
+          text={"Three parts,\none closed loop."}
           accent="closed"
           className="max-w-[18ch]"
         />
 
-        <div className="grid gap-16 lg:grid-cols-3">
+        <div className="grid gap-16 lg:grid-cols-3 lg:grid-rows-2">
           {SYSTEM.map((item, i) => (
-            <Reveal key={item.title} delay={i * 100}>
-              <div className="glass-card glass-card-hover flex h-full flex-col gap-16 rounded-lg p-24">
+            <Reveal
+              key={item.title}
+              delay={i * 100}
+              className={cx('h-full', i === 0 && 'lg:row-span-2')}
+            >
+              <div className="glass-card glass-card-hover flex h-full flex-col gap-16 rounded-lg p-24 lg:p-32">
                 <Badge tone="beam">{item.badge}</Badge>
-                <h3 className="text-title font-medium text-ink">{item.title}</h3>
+                <h3 className="font-display text-title font-medium text-ink">{item.title}</h3>
                 <p className="text-small text-ink-muted">{item.body}</p>
               </div>
             </Reveal>
@@ -251,7 +255,7 @@ export function Marketing() {
       <Section id="pipeline" label="Tracking pipeline" glow="right">
         <Heading
           size="lg"
-          text="Five stages, one frame at a time."
+          text={"Five stages,\none frame at a time."}
           accent="frame"
           className="max-w-[20ch]"
         />
@@ -263,16 +267,17 @@ export function Marketing() {
       </Section>
 
       {/* ---- Evidence ------------------------------------------------------ */}
-      <Section id="evidence" label="Evidence" surface="surface" glow="left">
+      <Section id="evidence" label="Evidence" glow="left" className="night">
         <div className="flex flex-col gap-32 lg:flex-row lg:items-end lg:justify-between">
           <Heading
             size="lg"
-            text="Eight adversarial phases, one verdict."
+            text={"Eight adversarial phases,\none verdict."}
             accent="verdict"
+            tone="light"
             className="max-w-[18ch]"
           />
           <Reveal delay={120}>
-            <p className="max-w-[46ch] text-body-lg text-ink-muted">
+            <p className="max-w-[46ch] text-body-lg text-night-muted">
               Thresholds are published before the run, not chosen after it, and every phase is
               graded on the same two questions: when the loop says it is locked, how well does it
               point — and how much of the phase does it stay locked? No phase gets an easier bar.
@@ -287,10 +292,10 @@ export function Marketing() {
             ['Lock retention', '≥ 60%', 'share of the whole phase spent locked'],
           ].map(([label, value, note], i) => (
             <Reveal key={label} delay={i * 100}>
-              <div className="glass-card glass-card-hover flex h-full flex-col gap-8 rounded-lg p-24">
+              <div className="night-card flex h-full flex-col gap-8 rounded-lg p-24">
                 <Label>{label}</Label>
-                <span className="stat-gradient font-mono text-heading-sm font-medium">{value}</span>
-                <p className="text-caption text-ink-muted">{note}</p>
+                <span className="font-mono text-heading-sm font-medium text-beam">{value}</span>
+                <p className="text-caption text-night-muted">{note}</p>
               </div>
             </Reveal>
           ))}
@@ -298,10 +303,12 @@ export function Marketing() {
 
         <Reveal delay={220}>
           <div className="flex flex-wrap items-center gap-12">
-            <Button to="/simulator" arrow>
+            <Button to="/simulator" arrow variant="glow">
               Run the stress test
             </Button>
-            <span className="text-caption text-ink-faint">Takes about 50 seconds in the browser.</span>
+            <span className="text-caption text-night-muted">
+              Takes about 50 seconds in the browser.
+            </span>
           </div>
         </Reveal>
       </Section>
@@ -311,7 +318,7 @@ export function Marketing() {
         <div className="flex flex-col gap-32 lg:flex-row lg:items-end lg:justify-between">
           <Heading
             size="lg"
-            text="Nine blocks, one signal path."
+            text={"Nine blocks,\none signal path."}
             accent="signal"
             className="max-w-[18ch]"
           />
@@ -330,7 +337,7 @@ export function Marketing() {
       <Section id="technology" label="Technology" surface="surface" glow="right">
         <Heading
           size="lg"
-          text="Mature parts, no exotic frameworks."
+          text={"Mature parts,\nno exotic frameworks."}
           accent="Mature"
           className="max-w-[18ch]"
         />
@@ -341,7 +348,7 @@ export function Marketing() {
       <Section id="applications" label="Where it applies" glow="left">
         <Heading
           size="lg"
-          text="Anywhere a narrow beam has to follow a moving target."
+          text={"Anywhere a narrow beam has\nto follow a moving target."}
           accent="narrow"
           className="max-w-[20ch]"
         />
@@ -360,7 +367,7 @@ export function Marketing() {
         <div className="grid gap-32 lg:grid-cols-2 lg:gap-64">
           <Heading
             size="md"
-            text="What is real here, and what is not."
+            text={"What is real here,\nand what is not."}
             accent="real"
             className="max-w-[16ch]"
           />
@@ -403,7 +410,7 @@ export function Marketing() {
       <Section id="team" label="The team" glow="left">
         <Heading
           size="lg"
-          text="Six roles, one loop."
+          text={"Six roles,\none loop."}
           accent="loop"
           className="max-w-[16ch]"
         />
@@ -416,7 +423,7 @@ export function Marketing() {
           <div className="flex flex-col gap-24">
             <Heading
               size="lg"
-              text="Built against a real problem statement."
+              text={"Built against a real\nproblem statement."}
               accent="real"
               className="max-w-[16ch]"
             />

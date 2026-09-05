@@ -100,7 +100,7 @@ export function Simulator() {
       <header className="flex flex-wrap items-end justify-between gap-16">
         <div className="flex flex-col gap-4">
           <Label tone="beam">Coarse alignment · virtual camera</Label>
-          <h1 className="text-heading-sm font-medium tracking-tight text-ink">
+          <h1 className="font-display text-heading-sm font-medium tracking-tight text-ink">
             Mission <span className="text-gradient">console</span>
           </h1>
         </div>

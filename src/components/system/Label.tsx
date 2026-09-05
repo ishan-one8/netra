@@ -16,7 +16,7 @@ const TONE = {
 export function Label({ children, tone = 'faint', className }: Props) {
   return (
     <span
-      className={cx('text-label font-medium uppercase tracking-label', TONE[tone], className)}
+      className={cx('font-display text-label font-semibold uppercase tracking-label', TONE[tone], className)}
     >
       {children}
     </span>

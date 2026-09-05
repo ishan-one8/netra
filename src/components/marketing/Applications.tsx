@@ -22,7 +22,7 @@ export function Applications() {
     <div className="grid gap-12 sm:grid-cols-2">
       {USES.map((u) => (
         <div key={u.name} className="glass-card glass-card-hover flex flex-col gap-8 rounded-md p-20">
-          <h3 className="text-title font-medium text-ink">{u.name}</h3>
+          <h3 className="font-display text-title font-medium text-ink">{u.name}</h3>
           <p className="text-small text-ink-muted">{u.detail}</p>
         </div>
       ))}

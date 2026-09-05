@@ -684,3 +684,68 @@
     transparent
   );
 }
+
+/* ---- Line reveal ----------------------------------------------------------
+   A headline arrives a line at a time, rising out of its own edge. Each line
+   is its own mask, so the letters are clipped rather than faded — which is
+   what makes the movement read as weight rather than as opacity. */
+.line-mask {
+  display: block;
+  overflow: hidden;
+  /* Descenders would be clipped by an exact box. */
+  padding-bottom: 0.12em;
+  margin-bottom: -0.12em;
+}
+
+.line-rise {
+  display: block;
+  transform: translateY(115%);
+  transition: transform 1000ms var(--ease-out);
+}
+
+.line-rise.is-in {
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .line-rise {
+    transform: none;
+    transition: none;
+  }
+}
+
+/* ---- Night section --------------------------------------------------------
+   One dark stretch in an otherwise light page. The break is the point: it is
+   where the evidence lives, and it should feel like walking into the control
+   room. */
+.night {
+  background: var(--color-night);
+  color: var(--color-surface);
+}
+
+.night .night-rule {
+  background: var(--color-night-rule);
+}
+
+.night-card {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--color-night-rule);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition:
+    transform 400ms var(--ease-out),
+    background 400ms var(--ease-out),
+    border-color 400ms var(--ease-out);
+}
+
+.night-card:hover {
+  transform: translateY(-3px);
+  background: rgba(255, 255, 255, 0.07);
+  border-color: rgba(255, 74, 28, 0.4);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .night-card:hover {
+    transform: none;
+  }
+}

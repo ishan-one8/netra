@@ -22,7 +22,7 @@ export function PipelineNode({ index, name, detail, lit, className }: Props) {
       >
         {index}
       </span>
-      <h3 className="text-title font-medium text-ink">{name}</h3>
+      <h3 className="font-display text-title font-medium text-ink">{name}</h3>
       <p className="text-small text-ink-muted">{detail}</p>
     </div>
   )

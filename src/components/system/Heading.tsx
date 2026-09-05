@@ -4,14 +4,16 @@ import { cx } from '../../lib/cx'
 type Size = 'title' | 'sm' | 'md' | 'lg' | 'display' | 'hero'
 
 type Props = {
+  /** Newlines are honoured as line breaks, and each line reveals on its own. */
   text: string
-  /** One word rendered in the beam colour. The only coloured type in the system. */
+  /** One word lit by the aurora rather than set in flat ink. */
   accent?: string
   size?: Size
   as?: 'h1' | 'h2' | 'h3'
   kinetic?: boolean
-  /** Renders the accent word lit by the aurora rather than in flat beam. */
   gradient?: boolean
+  /** Light type for the night section. */
+  tone?: 'ink' | 'light'
   className?: string
 }
 
@@ -20,13 +22,13 @@ const SIZE: Record<Size, string> = {
   sm: 'text-heading-sm',
   md: 'text-heading-sm sm:text-heading',
   lg: 'text-heading sm:text-heading-lg',
-  display: 'text-heading sm:text-heading-lg xl:text-display',
-  hero: 'text-heading-sm sm:text-heading-lg lg:text-display xl:text-display-xl',
+  display: 'text-heading-sm sm:text-heading lg:text-heading-lg xl:text-display',
+  hero: 'text-heading sm:text-heading-lg lg:text-display xl:text-display-xl',
 }
 
 /**
- * Headlines assemble word by word on first sight. Weight and tracking never
- * change on the way in — only opacity and a little travel.
+ * Headlines rise a line at a time out of their own edge, clipped rather than
+ * faded. Weight and tracking never change on the way in.
  */
 export function Heading({
   text,
@@ -35,35 +37,43 @@ export function Heading({
   as = 'h2',
   kinetic = true,
   gradient = false,
+  tone = 'ink',
   className,
 }: Props) {
-  const { ref, inView } = useInView<HTMLHeadingElement>({ threshold: 0.25 })
+  const { ref, inView } = useInView<HTMLHeadingElement>({ threshold: 0.2 })
   const Tag = as
-  const words = text.split(' ')
+  const lines = text.split('\n')
+  const shown = !kinetic || inView
 
   return (
     <Tag
       ref={ref}
-      className={cx(SIZE[size], 'font-medium text-ink', className)}
+      className={cx(
+        'font-display font-medium text-balance',
+        SIZE[size],
+        tone === 'light' ? 'text-surface' : 'text-ink',
+        className,
+      )}
     >
-      {words.map((word, i) => {
-        const bare = word.replace(/[.,—]/g, '')
-        const isAccent = Boolean(accent) && bare.toLowerCase() === accent!.toLowerCase()
-        return (
+      {lines.map((line, li) => (
+        <span key={`${line}-${li}`} className="line-mask">
           <span
-            key={`${word}-${i}`}
-            className={cx(
-              'reveal-word',
-              (!kinetic || inView) && 'is-in',
-              isAccent && (gradient ? 'text-gradient' : 'text-beam'),
-            )}
-            style={kinetic ? { transitionDelay: `${i * 40}ms` } : undefined}
+            className={cx('line-rise', shown && 'is-in')}
+            style={{ transitionDelay: `${li * 110}ms` }}
           >
-            {word}
-            {i < words.length - 1 ? ' ' : ''}
+            {line.split(' ').map((word, wi) => {
+              const bare = word.replace(/[.,—]/g, '')
+              const isAccent = Boolean(accent) && bare.toLowerCase() === accent!.toLowerCase()
+              return (
+                <span key={`${word}-${wi}`} className={cx(isAccent && (gradient ? 'text-gradient' : 'text-beam'))}>
+                  {word}
+                  {wi < line.split(' ').length - 1 ? ' ' : ''}
+                </span>
+              )
+            })}
           </span>
-        )
-      })}
+        </span>
+      ))}
     </Tag>
   )
 }
