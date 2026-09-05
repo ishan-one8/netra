@@ -80,11 +80,28 @@ export function CameraViewport({
       }
       ctx.stroke()
 
+      // Horizon, at zero elevation. Usually off-frame; when it drifts in, it is
+      // the clearest sign of where the camera is actually looking.
+      const horizonY = (0.5 + snap.gimbal.tilt / 16) * height
+      if (horizonY > -20 && horizonY < height + 20) {
+        ctx.strokeStyle = 'rgba(255,255,255,0.12)'
+        ctx.beginPath()
+        ctx.moveTo(0, horizonY)
+        ctx.lineTo(width, horizonY)
+        ctx.stroke()
+      }
+
+      // The sky does not move; the camera does. Shifting the field against the
+      // gimbal is what makes a slew visible at all — with the target held at
+      // boresight, nothing else on screen would tell you the camera is turning.
+      const wrap = (v: number) => ((v % 1) + 1) % 1
+      const skyX = -(snap.gimbal.pan / 24)
+      const skyY = snap.gimbal.tilt / 16
       for (const s of stars) {
         ctx.globalAlpha = s.a * (0.7 + 0.3 * Math.sin(t * 0.001 + s.x * 40))
         ctx.fillStyle = '#ffffff'
         ctx.beginPath()
-        ctx.arc(s.x * width, s.y * height, s.r, 0, Math.PI * 2)
+        ctx.arc(wrap(s.x + skyX) * width, wrap(s.y + skyY) * height, s.r, 0, Math.PI * 2)
         ctx.fill()
       }
       ctx.globalAlpha = 1

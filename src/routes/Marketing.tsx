@@ -165,8 +165,8 @@ export function Marketing() {
         <div className="flex flex-col gap-32 lg:flex-row lg:items-end lg:justify-between">
           <Heading
             size="lg"
-            text={"Pointing, acquisition and tracking\nhappens in two stages. The first\nis where links are lost."}
-            accent="two"
+            text={"Two stages decide the link.\nThe first is where it is lost."}
+            accent="first"
             className="max-w-[20ch]"
           />
           <Reveal delay={120}>
@@ -211,8 +211,8 @@ export function Marketing() {
       <Section id="system" label="The system" glow="right">
         <Heading
           size="lg"
-          text={"Three parts,\none closed loop."}
-          accent="closed"
+          text={"The camera is simulated.\nThe tracking is not."}
+          accent="not"
           className="max-w-[18ch]"
         />
 
@@ -248,8 +248,8 @@ export function Marketing() {
       <Section id="pipeline" label="Tracking pipeline" glow="right">
         <Heading
           size="lg"
-          text={"Five stages,\none frame at a time."}
-          accent="frame"
+          text={"One frame in.\nOne command out."}
+          accent="command"
           className="max-w-[20ch]"
         />
         <PipelineRow>
@@ -264,8 +264,8 @@ export function Marketing() {
         <div className="flex flex-col gap-32 lg:flex-row lg:items-end lg:justify-between">
           <Heading
             size="lg"
-            text={"Eight adversarial phases,\none verdict."}
-            accent="verdict"
+            text={"We publish the bar\nbefore we clear it."}
+            accent="before"
             tone="light"
             className="max-w-[18ch]"
           />
@@ -310,8 +310,8 @@ export function Marketing() {
         <div className="flex flex-col gap-32 lg:flex-row lg:items-end lg:justify-between">
           <Heading
             size="lg"
-            text={"Nine blocks,\none signal path."}
-            accent="signal"
+            text={"Every block here has\na hardware twin waiting."}
+            accent="twin"
             className="max-w-[18ch]"
           />
           <Reveal delay={120}>
@@ -400,8 +400,7 @@ export function Marketing() {
       <Section id="team" label="The team" glow="left">
         <Heading
           size="lg"
-          text={"Six roles,\none loop."}
-          accent="loop"
+          text={"Who owns what."}
           className="max-w-[16ch]"
         />
         <Team />

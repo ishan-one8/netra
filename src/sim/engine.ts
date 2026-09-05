@@ -10,6 +10,8 @@ import type { LogSeverity, Recovery, Telemetry, TrackState } from './types'
 import {
   ACQUIRE_DEG,
   DEG_PER_PX,
+  FOV_H,
+  FOV_V,
   LOCK_DEG,
   angularError,
   degToMrad,
@@ -46,6 +48,9 @@ export type SimSnapshot = {
   confidence: number
   occluded: boolean
   searching: boolean
+  /** Where the gimbal is pointed. The sky is inertial, so the viewport uses
+   *  this to move the star field against the camera. */
+  gimbal: { pan: number; tilt: number }
 }
 
 export type StepEvent = { severity: LogSeverity; message: string }
@@ -59,6 +64,12 @@ export type StepResult = {
 }
 
 const TRAIL_LENGTH = 56
+/** How long a track may run without closing on the target before it is dropped. */
+const STALE_BUDGET_MS = 2500
+/** How long a dropped bearing stays excluded from new tracks. */
+const REJECT_HOLD_MS = 7000
+/** How close a candidate must be to a dropped bearing to count as the same object. */
+const REJECT_RADIUS_DEG = 2
 
 const MODE_QUALITY: Record<
   TrackerMode,
@@ -86,6 +97,11 @@ export type Engine = {
   initiation: { count: number; x: number; y: number }
   lockTimer: number
   lostTimer: number
+  /** How long a track has been held without ever closing on the target. */
+  staleMs: number
+  /** Bearings a track was just dropped from, so the search does not walk
+   *  straight back onto the same object. */
+  rejected: Array<{ az: number; el: number; until: number }>
   searchPhase: number
   recovery: Recovery & { lostAt: number }
   metrics: {
@@ -116,6 +132,7 @@ export function createEngine(): Engine {
       confidence: 0,
       occluded: false,
       searching: true,
+      gimbal: { pan: 0, tilt: 42 },
     },
     motion: initialMotionState(),
     gimbal: { pan: 0, tilt: 42 },
@@ -125,6 +142,8 @@ export function createEngine(): Engine {
     initiation: { count: 0, x: 0, y: 0 },
     lockTimer: 0,
     lostTimer: 0,
+    staleMs: 0,
+    rejected: [],
     searchPhase: 0,
     recovery: { stage: 0, timings: [null, null, null, null, null], cycles: 0, lostAt: 0 },
     metrics: {
@@ -239,10 +258,20 @@ export function stepEngine(
   const predEl = e.estimate.el + e.estimate.vEl * quality.lead * 0.4
   const predProj = project(predAz, predEl, pan, tilt)
 
+  e.rejected = e.rejected.filter((r) => r.until > t)
+
   let best: Candidate | null = null
   let bestScore = -Infinity
   let bestAgreement = 0
   for (const c of candidates) {
+    // While opening a track, ignore anything sitting where a track was just
+    // dropped. Without this the loop drops a decoy and re-acquires the same
+    // decoy on the next frame, forever.
+    if (!e.estimate.valid) {
+      const cAz = pan + (c.x - 0.5) * FOV_H
+      const cEl = tilt - (c.y - 0.5) * FOV_V
+      if (e.rejected.some((r) => Math.hypot(cAz - r.az, cEl - r.el) < REJECT_RADIUS_DEG)) continue
+    }
     // How closely this candidate sits on the prediction, 0-1.
     const agreement = e.estimate.valid
       ? 1 - clamp(Math.hypot(c.x - predProj.x, c.y - predProj.y) / 0.35, 0, 1)
@@ -331,6 +360,7 @@ export function stepEngine(
   }
   e.gimbal.pan = slew(e.gimbal.pan, goalAz, dtS)
   e.gimbal.tilt = slew(e.gimbal.tilt, goalEl, dtS)
+  snap.gimbal = { pan: e.gimbal.pan, tilt: e.gimbal.tilt }
 
   // --- Error --------------------------------------------------------------
   const errDeg = angularError(trueAz, trueEl, e.gimbal.pan, e.gimbal.tilt)
@@ -368,7 +398,10 @@ export function stepEngine(
     next = e.lockTimer > 500 ? 'LOCKED' : 'ACQUIRED'
   } else {
     e.lockTimer = 0
-    next = errDeg < ACQUIRE_DEG ? 'ACQUIRED' : 'ACQUIRED'
+    // Holding something is not the same as holding the right thing. Beyond the
+    // acquisition window the loop is not closing on the target, whatever it has
+    // latched onto.
+    next = errDeg < ACQUIRE_DEG ? 'ACQUIRED' : 'SEARCHING'
   }
 
   const stateChanged = next !== previous
@@ -421,6 +454,32 @@ export function stepEngine(
       r.stage = 1
       events.push({ severity: 'fault', message: 'Track lost · return below detection floor' })
     }
+  }
+
+  // --- Track health -------------------------------------------------------
+  // A track that never closes on the target is a track on the wrong object.
+  // Give it a budget, then drop it and search again rather than staring at a
+  // decoy for the rest of the run.
+  if (detected && errDeg > ACQUIRE_DEG) {
+    e.staleMs += dt
+    if (e.staleMs > STALE_BUDGET_MS) {
+      e.rejected = [
+        ...e.rejected.slice(-2),
+        { az: e.estimate.az, el: e.estimate.el, until: t + REJECT_HOLD_MS },
+      ]
+      e.estimate.valid = false
+      e.initiation = { count: 0, x: 0, y: 0 }
+      e.staleMs = 0
+      e.lostTimer = 0
+      // Restart the spiral from the middle so the search leaves the area.
+      e.searchPhase = 0
+      events.push({
+        severity: 'fault',
+        message: 'Track dropped · never closed on boresight · candidate excluded',
+      })
+    }
+  } else {
+    e.staleMs = 0
   }
 
   if (e.state === 'LOCKED') m.lockedMs += dt
