@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useLocation } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { LogoMark } from '../brand/LogoMark'
 import { Button, NavLink } from '../system'
 import { cx } from '../../lib/cx'
@@ -54,9 +54,9 @@ export function SiteNav() {
       )}
     >
       <nav className="page-wide flex items-center justify-between gap-24 py-12">
-        <a href="/" className="inline-flex items-center" aria-label="NETRA home">
+        <Link to="/" className="inline-flex items-center" aria-label="NETRA home">
           <LogoMark />
-        </a>
+        </Link>
 
         <div className="hidden items-center gap-20 lg:flex">
           {onSimulator ? (

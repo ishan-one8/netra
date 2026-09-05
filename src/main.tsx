@@ -6,7 +6,9 @@ import './styles/index.css'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <BrowserRouter>
+    {/* Vite's base doubles as the router basename, so the same build works
+        at a subpath on Pages and at the root of a custom domain. */}
+    <BrowserRouter basename={import.meta.env.BASE_URL}>
       <App />
     </BrowserRouter>
   </StrictMode>,
