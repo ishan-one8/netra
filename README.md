@@ -18,6 +18,11 @@ so NETRA closes the loop in software instead: a virtual camera renders what the
 sensor would see, a detector proposes candidates, an estimator holds the track,
 and a rate-limited gimbal steers the boresight.
 
+## Picking up the work
+
+Whoever is building the detector should start with [HANDOFF.md](HANDOFF.md):
+what exists, where the seam is, and the two things that surprise people.
+
 ## Running it
 
 ```bash
