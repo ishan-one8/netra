@@ -780,7 +780,7 @@
   position: absolute;
   right: 6vw;
   top: 0;
-  width: 60px;
+  width: 76px;
   will-change: transform;
   transition: opacity 400ms var(--ease-out);
 }
@@ -789,7 +789,7 @@
 .rocket-trail {
   position: absolute;
   left: 50%;
-  bottom: calc(100% - 14px);
+  bottom: calc(100% - 16px);
   width: 1px;
   height: var(--trail, 20vh);
   transform: translateX(-50%);
@@ -810,9 +810,9 @@
 .rocket-flame {
   position: absolute;
   left: 50%;
-  top: 154px;
-  width: 18px;
-  height: 58px;
+  top: 192px;
+  width: 22px;
+  height: 70px;
   transform: translateX(-50%);
   border-radius: 0 0 50% 50%;
   background: linear-gradient(
@@ -828,9 +828,9 @@
 .rocket-glow {
   position: absolute;
   left: 50%;
-  top: 136px;
-  width: 152px;
-  height: 152px;
+  top: 170px;
+  width: 184px;
+  height: 184px;
   transform: translate(-50%, 0);
   border-radius: var(--radius-full);
   background: radial-gradient(circle, rgba(255, 90, 44, 0.28), transparent 68%);
