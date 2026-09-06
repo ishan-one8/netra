@@ -778,9 +778,9 @@
 
 .rocket-rig {
   position: absolute;
-  right: 6vw;
+  right: 3.2vw;
   top: 0;
-  width: 76px;
+  width: 70px;
   will-change: transform;
   transition: opacity 400ms var(--ease-out);
 }
@@ -789,7 +789,7 @@
 .rocket-trail {
   position: absolute;
   left: 50%;
-  bottom: calc(100% - 16px);
+  bottom: calc(100% - 8px);
   width: 1px;
   height: var(--trail, 20vh);
   transform: translateX(-50%);
@@ -806,13 +806,11 @@
   display: block;
 }
 
-/* The burn. Two offset flickers keep it from looking like a loop. */
+/* The burn. Each plume flickers on its own clock, so the three never pulse
+   together and read as one animation. */
 .rocket-flame {
   position: absolute;
-  left: 50%;
-  top: 192px;
-  width: 22px;
-  height: 70px;
+  top: 305px;
   transform: translateX(-50%);
   border-radius: 0 0 50% 50%;
   background: linear-gradient(
@@ -825,12 +823,34 @@
   animation: rocket-burn 220ms steps(2, end) infinite alternate;
 }
 
+/* The solid boosters do most of the work at liftoff, and look it. */
+.rocket-flame--left {
+  left: 18%;
+  width: 14px;
+  height: 74px;
+}
+
+.rocket-flame--right {
+  left: 82%;
+  width: 14px;
+  height: 74px;
+  animation-duration: 260ms;
+}
+
+.rocket-flame--core {
+  left: 50%;
+  top: 302px;
+  width: 17px;
+  height: 58px;
+  animation-duration: 190ms;
+}
+
 .rocket-glow {
   position: absolute;
   left: 50%;
-  top: 170px;
-  width: 184px;
-  height: 184px;
+  top: 262px;
+  width: 200px;
+  height: 200px;
   transform: translate(-50%, 0);
   border-radius: var(--radius-full);
   background: radial-gradient(circle, rgba(255, 90, 44, 0.28), transparent 68%);

@@ -9,8 +9,10 @@ import { prefersReducedMotion } from '../../lib/motion'
  * dragged. Position is written straight to a transform on each frame; nothing
  * re-renders while you scroll.
  *
- * The livery is the flag and an orbit mark, the way a launch vehicle carries
- * them: national colours on the tank, agency mark below the nose.
+ * Shaped after LVM3: an ogive fairing wider than the stage beneath it, a
+ * ribbed cryogenic core, and two solid boosters strapped either side — which
+ * is the silhouette, more than any decal, that reads as Indian. Stencilled the
+ * way the real one is: LVM3 on the core, ISRO and INDIA down the boosters.
  */
 export function ScrollRocket() {
   const ref = useRef<HTMLDivElement>(null)
@@ -51,89 +53,121 @@ export function ScrollRocket() {
       <div ref={ref} className="rocket-rig">
         <span className="rocket-trail" />
 
-        <svg className="rocket-body" viewBox="0 0 76 226" width="76" height="226" fill="none">
-          {/* Nose */}
-          <path d="M38 3 L52 46 L24 46 Z" className="fill-ink" />
-          {/* Fuselage */}
-          <rect x="24" y="46" width="28" height="128" rx="2.5" className="fill-ink" />
+        <svg className="rocket-body" viewBox="0 0 50 222" width="70" height="311" fill="none">
+          {/* ---- Payload fairing. Ogive, and wider than the stage under it:
+                  that step is the silhouette that reads as a launch vehicle
+                  rather than a cartoon rocket. ---- */}
+          <path
+            d="M25 2 C 21.5 9, 14 20, 14 32 L14 62 L36 62 L36 32 C 36 20, 28.5 9, 25 2 Z"
+            className="fill-ink"
+          />
+          <path d="M14 62 L36 62 L33 74 L17 74 Z" className="fill-ink" />
+
+          {/* ---- Equipment bay ---- */}
+          <rect x="17" y="74" width="16" height="11" fill="#b4b4c2" />
+
+          {/* ---- L110 / C25 core ---- */}
+          <rect x="17" y="85" width="16" height="113" className="fill-ink" />
+          {/* The cryogenic section runs a shade colder than the rest */}
+          <rect x="17" y="120" width="16" height="42" fill="#dcdce4" />
+          <g stroke="rgba(0,0,0,0.16)" strokeWidth="0.55">
+            <path d="M17 126 H33 M17 133 H33 M17 140 H33 M17 147 H33 M17 154 H33 M17 161 H33" />
+          </g>
+          <path d="M20 198 L16.5 216 L33.5 216 L30 198 Z" className="fill-ink-faint" />
+
+          {/* ---- S200 solid boosters, strapped tight to the core ---- */}
+          <path
+            d="M9 96 C 6.5 103, 2 112, 2 121 L2 202 L16 202 L16 121 C 16 112, 11.5 103, 9 96 Z"
+            className="fill-ink"
+          />
+          <path
+            d="M41 96 C 43.5 103, 48 112, 48 121 L48 202 L34 202 L34 121 C 34 112, 38.5 103, 41 96 Z"
+            className="fill-ink"
+          />
+          <path d="M4.5 202 L2 219 L15 219 L13 202 Z" className="fill-ink-faint" />
+          <path d="M45.5 202 L48 219 L35 219 L37 202 Z" className="fill-ink-faint" />
+          {/* Segment joints */}
+          <g stroke="rgba(0,0,0,0.18)" strokeWidth="0.55">
+            <path d="M2 140 H16 M2 174 H16 M34 140 H48 M34 174 H48" />
+          </g>
+
+          {/* ---- Fairing decals ---- */}
+          {/* The national colours. Literal hex on purpose: these are the flag's
+              values, not the product's palette, so they are not tokens. */}
+          <rect x="16.5" y="38" width="8" height="1.8" fill="#FF9933" />
+          <rect x="16.5" y="39.8" width="8" height="1.8" fill="#FFFFFF" />
+          <rect x="16.5" y="41.6" width="8" height="1.8" fill="#138808" />
+          <circle cx="20.5" cy="40.7" r="0.7" fill="none" stroke="#000080" strokeWidth="0.3" />
+          <rect
+            x="16.5"
+            y="38"
+            width="8"
+            height="5.4"
+            fill="none"
+            stroke="rgba(0,0,0,0.3)"
+            strokeWidth="0.35"
+          />
 
           {/* Agency mark. Drawn, not the official asset: an ascending vehicle
-              inside its orbit, in ISRO's vermillion. Swap in the real file from
-              isro.gov.in when you have it — see the note in README. */}
-          <g transform="translate(38 63)">
-            <circle r="10.5" fill="#0b0b12" />
-            <circle r="10.5" fill="none" stroke="#FF6D00" strokeWidth="0.7" opacity="0.5" />
+              inside its orbit, in ISRO's vermillion. Drop the real file into
+              public/ and this swaps out in one line. */}
+          <g transform="translate(30.5 40.7)">
+            <circle r="3.8" fill="#0b0b12" />
             <ellipse
-              rx="8.6"
-              ry="3.5"
+              rx="3.1"
+              ry="1.3"
               transform="rotate(-26)"
               fill="none"
               stroke="#FF6D00"
-              strokeWidth="0.85"
+              strokeWidth="0.45"
             />
-            <ellipse
-              rx="8.6"
-              ry="3.5"
-              transform="rotate(26)"
-              fill="none"
-              stroke="#FF6D00"
-              strokeWidth="0.85"
-              opacity="0.55"
-            />
-            {/* Satellite riding the near orbit */}
-            <rect x="6.4" y="-4.6" width="2.1" height="2.1" fill="#FF6D00" />
-            {/* The vehicle, ascending */}
-            <path d="M0 -8.6 L2.4 -1.6 L2.4 3 L-2.4 3 L-2.4 -1.6 Z" fill="#FF6D00" />
-            <path d="M-2.4 0.4 L-4.6 3.4 L-2.4 3 Z" fill="#FF6D00" />
-            <path d="M2.4 0.4 L4.6 3.4 L2.4 3 Z" fill="#FF6D00" />
-            <path d="M-2.4 3 L0 8.4 L2.4 3 Z" fill="#FF9933" />
+            <path d="M0 -3.1 L0.9 -0.6 L0.9 1.1 L-0.9 1.1 L-0.9 -0.6 Z" fill="#FF6D00" />
+            <path d="M-0.9 1.1 L0 3 L0.9 1.1 Z" fill="#FF9933" />
           </g>
 
-          {/* The national colours. Literal hex on purpose: these are the flag's
-              values, not the product's palette, so they are not tokens. */}
-          <rect x="24" y="80" width="28" height="8" fill="#FF9933" />
-          <rect x="24" y="88" width="28" height="8" fill="#FFFFFF" />
-          <rect x="24" y="96" width="28" height="8" fill="#138808" />
-          <circle cx="38" cy="92" r="3" fill="none" stroke="#000080" strokeWidth="0.8" />
-          <circle cx="38" cy="92" r="0.7" fill="#000080" />
-          {/* The band is a decal, so it needs an edge — the white stripe would
-              otherwise dissolve into the white tank. */}
-          <rect
-            x="24"
-            y="80"
-            width="28"
-            height="24"
-            fill="none"
-            stroke="rgba(0,0,0,0.28)"
-            strokeWidth="0.7"
-          />
-
-          {/* Painted down the tank, as it is on the real vehicles. */}
+          {/* ---- Stencilling, where the real vehicle carries it ---- */}
           <text
-            x="38"
-            y="138"
-            transform="rotate(90 38 138)"
+            x="25"
+            y="93"
+            textAnchor="middle"
+            fontSize="4.2"
+            fontWeight="700"
+            className="fill-paper font-mono"
+          >
+            LVM3
+          </text>
+          <text
+            x="9"
+            y="155"
+            transform="rotate(90 9 155)"
             textAnchor="middle"
             dominantBaseline="middle"
-            fontSize="10.5"
+            fontSize="6"
             fontWeight="700"
-            letterSpacing="3"
+            letterSpacing="1.6"
             className="fill-paper font-mono"
           >
             ISRO
           </text>
-
-          {/* Grid fins, stowed high on the body */}
-          <path d="M24 54 L12 62 L12 74 L24 68 Z" className="fill-ink-muted" />
-          <path d="M52 54 L64 62 L64 74 L52 68 Z" className="fill-ink-muted" />
-          {/* Landing legs, deployed for the burn */}
-          <path d="M24 160 L9 199 L15 200 L27 165 Z" className="fill-ink-muted" />
-          <path d="M52 160 L67 199 L61 200 L49 165 Z" className="fill-ink-muted" />
-          {/* Engine bell */}
-          <path d="M29 174 L24 194 L52 194 L47 174 Z" className="fill-ink-faint" />
+          <text
+            x="41"
+            y="155"
+            transform="rotate(90 41 155)"
+            textAnchor="middle"
+            dominantBaseline="middle"
+            fontSize="5.5"
+            fontWeight="700"
+            letterSpacing="1.3"
+            className="fill-paper font-mono"
+          >
+            INDIA
+          </text>
         </svg>
 
-        <span className="rocket-flame" />
+        {/* Three plumes: the two solid boosters, and the core between them. */}
+        <span className="rocket-flame rocket-flame--left" />
+        <span className="rocket-flame rocket-flame--right" />
+        <span className="rocket-flame rocket-flame--core" />
         <span className="rocket-glow" />
       </div>
     </div>
