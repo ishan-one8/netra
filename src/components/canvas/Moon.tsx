@@ -93,6 +93,7 @@ export function Moon() {
     let cx = 0
     let cy = 0
     let narrow = false
+    let capBottom = 0
     let dirty = true
 
     /** Paints the disc into the offscreen canvas, centred, at radius R. */
@@ -217,19 +218,25 @@ export function Moon() {
       canvas.style.height = `${h}px`
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
 
-      // Wide screens get it cropped by the top edge — we are looking up at
-      // it. Only a quarter of the disc is hidden: crop much more than that and
-      // all that is left on screen is the limb, where foreshortening and limb
-      // darkening between them erase every crater.
+      // Pinned by two ends: the disc's centre sits at y=40, up behind the nav,
+      // and its cap stops at two fifths of the sky. The radius is whatever
+      // spans them.
       //
-      // A phone has no room for that. Its header takes the top 132px and the
+      // Both ends matter. Crop harder and only the limb is left on screen,
+      // where foreshortening and limb darkening between them erase every
+      // crater — that is a wide grey smudge, not a moon. Crop less and it runs
+      // into the headline. Keeping the centre just above the fold is what puts
+      // the textured middle of the face in the visible strip.
+      //
+      // A phone has no such strip. Its header takes the top 132px and the
       // headline starts at 272, so there the moon is whole, hangs just under
       // the header, and is drawn at half strength — the eyebrow line crosses
       // it, and that line has to stay readable.
       narrow = w < 700
-      R = narrow ? w * 0.3 : Math.min(Math.max(w * 0.34, h * 0.34), h * 0.4, 460)
+      capBottom = narrow ? 0 : h * 0.4
+      R = narrow ? w * 0.3 : Math.min(capBottom - 40, w * 0.36)
       cx = w * 0.5
-      cy = narrow ? 132 + R * 0.55 : -R * 0.25
+      cy = narrow ? 132 + R * 0.55 : capBottom - R
 
       paintSurface()
       dirty = true
@@ -287,13 +294,13 @@ export function Moon() {
 
       // The corona it throws into the sky, breathing slowly.
       const pulse = 0.5 + 0.5 * Math.sin(t / 4200)
-      const halo = ctx.createRadialGradient(cx, cy, R * 0.92, cx, cy, R * 2)
-      halo.addColorStop(0, `rgba(206, 216, 255, ${(0.075 + 0.05 * pulse).toFixed(3)})`)
-      halo.addColorStop(0.45, 'rgba(206, 216, 255, 0.035)')
+      const halo = ctx.createRadialGradient(cx, cy, R * 0.9, cx, cy, R * 2.4)
+      halo.addColorStop(0, `rgba(206, 216, 255, ${(0.11 + 0.07 * pulse).toFixed(3)})`)
+      halo.addColorStop(0.4, 'rgba(206, 216, 255, 0.05)')
       halo.addColorStop(1, 'rgba(206, 216, 255, 0)')
       ctx.fillStyle = halo
       ctx.beginPath()
-      ctx.arc(cx, cy, R * 2, 0, TAU)
+      ctx.arc(cx, cy, R * 2.4, 0, TAU)
       ctx.fill()
 
       // Libration. The real moon shows us a few degrees around its edges as it
@@ -325,10 +332,13 @@ export function Moon() {
       ctx.fillStyle = term
       ctx.fillRect(cx - R, dy - R, R * 2, R * 2)
 
-      // The lower half sets into haze rather than ending at a hard edge. That
-      // is what lets the disc be this large: the hero's own type runs across
-      // the bottom of it, and by then the moon has gone.
-      const haze = ctx.createLinearGradient(0, dy + R * 0.55, 0, dy + R)
+      // Only the last stretch before the cap ends sets into haze. Hung off the
+      // cap's own bottom edge, not off the radius — on a disc this cropped the
+      // radius puts the fade above the header, which is what left nothing but
+      // a grey smudge on a short window.
+      const hazeTop = narrow ? dy + R * 0.55 : Math.max(0, capBottom - h * 0.11)
+      const hazeEnd = narrow ? dy + R : capBottom + 2
+      const haze = ctx.createLinearGradient(0, hazeTop, 0, hazeEnd)
       haze.addColorStop(0, 'rgba(6, 6, 10, 0)')
       haze.addColorStop(1, 'rgba(6, 6, 10, 0.94)')
       ctx.fillStyle = haze
@@ -336,17 +346,6 @@ export function Moon() {
       ctx.restore()
 
       ctx.globalAlpha = 1
-
-      // The header sits on this sky and carries its own translucent ground.
-      // This only takes the top edge down far enough that the ground has
-      // something to work against — the disc stays bright underneath it.
-      const HEADER = 96
-      const cap = ctx.createLinearGradient(0, 0, 0, HEADER)
-      cap.addColorStop(0, 'rgba(6, 6, 10, 0.55)')
-      cap.addColorStop(0.5, 'rgba(6, 6, 10, 0.3)')
-      cap.addColorStop(1, 'rgba(6, 6, 10, 0)')
-      ctx.fillStyle = cap
-      ctx.fillRect(0, 0, w, HEADER)
     }
 
     // Measuring reads layout, so it happens when the viewport actually
