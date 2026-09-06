@@ -631,6 +631,27 @@
   transform: scaleX(1);
 }
 
+/* A highlight that follows the pointer across the card. Position comes from
+   two custom properties set by useCardGlow, so nothing here re-renders. */
+.glass-card-hover::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 300ms var(--ease-out);
+  background: radial-gradient(
+    220px circle at var(--mx, 50%) var(--my, 0%),
+    rgba(255, 90, 44, 0.13),
+    transparent 68%
+  );
+}
+
+.glass-card-hover:hover::after {
+  opacity: 1;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .glass-card-hover:hover {
     transform: none;

@@ -5,6 +5,7 @@
  * numbers have to be checkable without a browser. This drives the same engine
  * the UI drives, at a fixed timestep, and prints what it actually achieves.
  */
+import { writeFileSync } from 'node:fs'
 import { createEngine, seedDecoys, stepEngine, type SimParams } from '../src/sim/engine'
 import { LOCK_DEG } from '../src/sim/camera'
 import { degToMrad } from '../src/sim/camera'
@@ -67,6 +68,8 @@ console.log(
 )
 console.log('-'.repeat(78))
 
+const rows: Record<string, unknown>[] = []
+
 for (const s of SCENARIOS) {
   const rand = mulberry32(42)
   const engine = createEngine()
@@ -107,6 +110,17 @@ for (const s of SCENARIOS) {
   const ok = retention >= 60 && lMean <= 14
   if (!ok) anyFail = true
 
+  rows.push({
+    name: s.name,
+    mean: Number(mean.toFixed(1)),
+    peak: Number(peak.toFixed(1)),
+    meanLocked: Number(lMean.toFixed(1)),
+    peakLocked: Number(lPeak.toFixed(1)),
+    retention: Number(retention.toFixed(0)),
+    acquisitionS: Number(acq.toFixed(2)),
+    pass: ok,
+  })
+
   console.log(
     s.name.padEnd(20) +
       `${mean.toFixed(1)}`.padStart(9) +
@@ -120,4 +134,20 @@ for (const s of SCENARIOS) {
 }
 
 console.log('\nunits: mrad · |lkd columns are measured only while the loop reports lock\n')
+
+// The site shows these numbers, so it reads them from here rather than from
+// anything typed by hand. `npm run bench -- --emit` regenerates the file, and
+// a stale one shows up as a diff.
+if (process.argv.includes('--emit')) {
+  const out = {
+    generated: new Date().toISOString().slice(0, 10),
+    thresholds: { meanLockedMrad: 14, retentionPct: 60 },
+    lockWindowMrad: Number(LOCK_MRAD.toFixed(1)),
+    scenarios: rows,
+  }
+  const path = new URL('../src/sim/bench-results.json', import.meta.url)
+  writeFileSync(path, `${JSON.stringify(out, null, 2)}\n`)
+  console.log(`wrote ${rows.length} scenarios to src/sim/bench-results.json\n`)
+}
+
 process.exit(anyFail ? 1 : 0)

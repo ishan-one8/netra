@@ -1,0 +1,120 @@
+{
+  "generated": "2026-09-06",
+  "thresholds": {
+    "meanLockedMrad": 14,
+    "retentionPct": 60
+  },
+  "lockWindowMrad": 20.9,
+  "scenarios": [
+    {
+      "name": "Nominal",
+      "mean": 0.8,
+      "peak": 2.3,
+      "meanLocked": 0.8,
+      "peakLocked": 2.3,
+      "retention": 100,
+      "acquisitionS": 0.72,
+      "pass": true
+    },
+    {
+      "name": "Fast target",
+      "mean": 1.6,
+      "peak": 3.3,
+      "meanLocked": 1.6,
+      "peakLocked": 3.3,
+      "retention": 100,
+      "acquisitionS": 0.72,
+      "pass": true
+    },
+    {
+      "name": "Vibration",
+      "mean": 0.9,
+      "peak": 2.4,
+      "meanLocked": 0.9,
+      "peakLocked": 2.4,
+      "retention": 100,
+      "acquisitionS": 0.72,
+      "pass": true
+    },
+    {
+      "name": "Sensor noise",
+      "mean": 1.6,
+      "peak": 4.7,
+      "meanLocked": 1.6,
+      "peakLocked": 4.7,
+      "retention": 100,
+      "acquisitionS": 0.8,
+      "pass": true
+    },
+    {
+      "name": "Turbulence",
+      "mean": 2.7,
+      "peak": 6.3,
+      "meanLocked": 2.7,
+      "peakLocked": 6.3,
+      "retention": 100,
+      "acquisitionS": 0.78,
+      "pass": true
+    },
+    {
+      "name": "Dropout",
+      "mean": 22.2,
+      "peak": 221.8,
+      "meanLocked": 0.9,
+      "peakLocked": 2.3,
+      "retention": 78,
+      "acquisitionS": 0.72,
+      "pass": true
+    },
+    {
+      "name": "Decoys",
+      "mean": 0.9,
+      "peak": 2.3,
+      "meanLocked": 0.9,
+      "peakLocked": 2.3,
+      "retention": 100,
+      "acquisitionS": 0.72,
+      "pass": true
+    },
+    {
+      "name": "Combined",
+      "mean": 33.3,
+      "peak": 173.9,
+      "meanLocked": 3.5,
+      "peakLocked": 22.4,
+      "retention": 68,
+      "acquisitionS": 0.83,
+      "pass": true
+    },
+    {
+      "name": "Centroid + decoys",
+      "mean": 0.6,
+      "peak": 1.5,
+      "meanLocked": 0.6,
+      "peakLocked": 1.5,
+      "retention": 100,
+      "acquisitionS": 0.72,
+      "pass": true
+    },
+    {
+      "name": "Lissajous",
+      "mean": 2,
+      "peak": 3.6,
+      "meanLocked": 2,
+      "peakLocked": 3.6,
+      "retention": 100,
+      "acquisitionS": 0.72,
+      "pass": true
+    },
+    {
+      "name": "Random wander",
+      "mean": 0.7,
+      "peak": 1.8,
+      "meanLocked": 0.7,
+      "peakLocked": 1.8,
+      "retention": 100,
+      "acquisitionS": 0.72,
+      "pass": true
+    }
+  ]
+}

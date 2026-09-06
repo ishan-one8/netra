@@ -13,9 +13,11 @@ import { ScrollProgress } from './components/system'
 import { ScrollRocket } from './components/canvas/ScrollRocket'
 import { Starfield } from './components/canvas/Starfield'
 import { Moon } from './components/canvas/Moon'
+import { useCardGlow } from './lib/useCardGlow'
 
 export default function App() {
   const { pathname } = useLocation()
+  useCardGlow()
 
   return (
     <div className="flex min-h-screen flex-col bg-paper">

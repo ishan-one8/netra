@@ -6,6 +6,8 @@ import { ArchitectureFlow } from '../components/marketing/ArchitectureFlow'
 import { Applications } from '../components/marketing/Applications'
 import { TechStack } from '../components/marketing/TechStack'
 import { Team } from '../components/marketing/Team'
+import { BenchTable } from '../components/marketing/BenchTable'
+import bench from '../sim/bench-results.json'
 import { Section } from '../components/layout/Section'
 import {
   Aurora,
@@ -20,10 +22,39 @@ import {
   PipelineNode,
   Reveal,
   Spotlight,
+  CountUp,
 } from '../components/system'
 import { useInView } from '../lib/useInView'
 import type { TrackState } from '../sim/types'
 import { cx } from '../lib/cx'
+
+/**
+ * Read out of the bench's own output rather than typed here, so the headline
+ * figures cannot quietly drift away from what the code actually does.
+ */
+const HERO_STATS = [
+  {
+    value: bench.scenarios[0].meanLocked,
+    decimals: 1,
+    unit: 'mrad',
+    suffix: '',
+    note: 'nominal pointing error',
+  },
+  {
+    value: bench.lockWindowMrad,
+    decimals: 1,
+    unit: 'mrad',
+    suffix: '',
+    note: 'lock window',
+  },
+  {
+    value: bench.scenarios.filter((s) => s.pass).length,
+    decimals: 0,
+    unit: '',
+    suffix: `/ ${bench.scenarios.length}`,
+    note: 'scenarios hold',
+  },
+] as const
 
 const SPEC_STRIP = [
   'Gigabit-to-terabit data rates',
@@ -143,17 +174,16 @@ export function Marketing() {
 
           <Reveal delay={340}>
             <div className="flex flex-wrap items-center justify-center gap-32">
-              {[
-                ['0.8', 'mrad', 'nominal pointing error'],
-                ['20.9', 'mrad', 'lock window'],
-                ['11 / 11', '', 'scenarios hold'],
-              ].map(([value, unit, note]) => (
-                <div key={note} className="flex flex-col items-center gap-2">
+              {HERO_STATS.map((s) => (
+                <div key={s.note} className="flex flex-col items-center gap-2">
                   <span className="font-mono text-title font-medium text-ink">
-                    {value}
-                    {unit ? <span className="text-caption text-ink-faint"> {unit}</span> : null}
+                    <CountUp to={s.value} decimals={s.decimals} />
+                    {s.suffix ? (
+                      <span className="text-ink-faint"> {s.suffix}</span>
+                    ) : null}
+                    {s.unit ? <span className="text-caption text-ink-faint"> {s.unit}</span> : null}
                   </span>
-                  <span className="text-caption text-ink-muted">{note}</span>
+                  <span className="text-caption text-ink-muted">{s.note}</span>
                 </div>
               ))}
             </div>
@@ -322,6 +352,8 @@ export function Marketing() {
             </Reveal>
           ))}
         </div>
+
+        <BenchTable />
 
         <Reveal delay={220}>
           <div className="flex flex-wrap items-center gap-12">

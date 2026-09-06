@@ -93,7 +93,6 @@ export function Moon() {
     let cx = 0
     let cy = 0
     let narrow = false
-    let capBottom = 0
     let dirty = true
 
     /** Paints the disc into the offscreen canvas, centred, at radius R. */
@@ -232,11 +231,14 @@ export function Moon() {
       // headline starts at 272, so there the moon is whole, hangs just under
       // the header, and is drawn at half strength — the eyebrow line crosses
       // it, and that line has to stay readable.
+      // The centre is pinned just behind the nav and the radius is bounded by
+      // both the sky's height and the page's width. Deriving cy from the cap
+      // instead let a tall window — a portrait monitor — push the whole disc
+      // down over the headline once the width bound took over.
       narrow = w < 700
-      capBottom = narrow ? 0 : h * 0.4
-      R = narrow ? w * 0.3 : Math.min(capBottom - 40, w * 0.36)
+      R = narrow ? w * 0.3 : Math.min(h * 0.4 - 40, w * 0.36)
       cx = w * 0.5
-      cy = narrow ? 132 + R * 0.55 : capBottom - R
+      cy = narrow ? 132 + R * 0.55 : 40
 
       paintSurface()
       dirty = true
@@ -332,12 +334,11 @@ export function Moon() {
       ctx.fillStyle = term
       ctx.fillRect(cx - R, dy - R, R * 2, R * 2)
 
-      // Only the last stretch before the cap ends sets into haze. Hung off the
-      // cap's own bottom edge, not off the radius — on a disc this cropped the
-      // radius puts the fade above the header, which is what left nothing but
-      // a grey smudge on a short window.
-      const hazeTop = narrow ? dy + R * 0.55 : Math.max(0, capBottom - h * 0.11)
-      const hazeEnd = narrow ? dy + R : capBottom + 2
+      // The lower half sets into haze rather than ending at a hard edge: the
+      // hero's own type runs across the bottom of the disc, and by then the
+      // moon has gone.
+      const hazeTop = dy + R * 0.55
+      const hazeEnd = dy + R + 2
       const haze = ctx.createLinearGradient(0, hazeTop, 0, hazeEnd)
       haze.addColorStop(0, 'rgba(6, 6, 10, 0)')
       haze.addColorStop(1, 'rgba(6, 6, 10, 0.94)')
